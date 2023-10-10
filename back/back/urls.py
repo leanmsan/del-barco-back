@@ -23,3 +23,4 @@ urlpatterns = [
     path('api/', include('proveedores.urls'),name='proveedores'),
     path('api/', include('movimientos.urls'),name='movimientos')
     ]
+
