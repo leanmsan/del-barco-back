@@ -28,3 +28,4 @@ media/
 
 # Archivos de secretos o claves de desarrollo
 secret_key.txt
+back/back/settings.py
