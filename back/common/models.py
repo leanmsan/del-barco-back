@@ -8,16 +8,6 @@
 from django.db import models
 
 
-class Alerta(models.Model):
-    id = models.IntegerField(primary_key=True)
-    alerta = models.CharField(max_length=25, blank=True, null=True)
-    fecha = models.DateTimeField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'alerta'
-
-
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
 
@@ -166,13 +156,13 @@ class Entradadetalle(models.Model):
 
 
 class Insumo(models.Model):
-    idinsumo = models.IntegerField(db_column='idInsumo', primary_key=True)  # Field name made lowercase.
+    idinsumo = models.AutoField(db_column='idInsumo', primary_key=True)  # Field name made lowercase.
     descripcion = models.CharField(max_length=80, blank=True, null=True)
     cantidad_disponible = models.IntegerField(blank=True, null=True)
     tipo_medida = models.CharField(max_length=5, blank=True, null=True)
     categoria = models.CharField(max_length=20, blank=True, null=True)
-    precio_unitario = models.FloatField(blank=True, null=True)
-    proveedor = models.ForeignKey('Proveedor', models.DO_NOTHING, db_column='proveedor', to_field='nombre', blank=False, null=False)
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    proveedor = models.ForeignKey('Proveedor', models.DO_NOTHING, db_column='proveedor', to_field='nombre', blank=True, null=True)
 
     class Meta:
         managed = False
@@ -180,8 +170,8 @@ class Insumo(models.Model):
 
 
 class Proveedor(models.Model):
-    idproveedor = models.IntegerField(db_column='idProveedor', primary_key=True)  # Field name made lowercase.
-    nombre = models.CharField(max_length=60, blank=True, null=True, unique=True)
+    idproveedor = models.AutoField(db_column='idProveedor', primary_key=True)  # Field name made lowercase.
+    nombre = models.CharField(max_length=60, blank=True, null=True)
     mail = models.CharField(max_length=80, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     estado = models.CharField(max_length=1, blank=True, null=True)
@@ -189,6 +179,17 @@ class Proveedor(models.Model):
     class Meta:
         managed = False
         db_table = 'proveedor'
+
+
+class PuntoReposicion(models.Model):
+    idpuntoreposicion = models.IntegerField(db_column='idPuntoReposicion', primary_key=True)  # Field name made lowercase.
+    idinsumo = models.ForeignKey(Insumo, models.DO_NOTHING, db_column='idInsumo')  # Field name made lowercase.
+    punto_reposicion = models.IntegerField(blank=True, null=True)
+    fecha_ultima_compra = models.DateField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'punto_reposicion'
 
 
 class Recetadetalle(models.Model):
@@ -211,6 +212,16 @@ class Recetas(models.Model):
     class Meta:
         managed = False
         db_table = 'recetas'
+
+
+class RegistroAlertasStock(models.Model):
+    idalerta = models.AutoField(db_column='idAlerta', primary_key=True)  # Field name made lowercase.
+    descripcion_alerta = models.CharField(max_length=25, blank=True, null=True)
+    fecha_alerta = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'registro_alertas_stock'
 
 
 class Salida(models.Model):
