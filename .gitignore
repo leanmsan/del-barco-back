@@ -1,3 +1,30 @@
 *.pyc
 
 back\back\settings.py
+
+# Archivos de cache y bases de datos
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+*.log
+
+# Archivo de configuración local
+settings_local.py
+
+# Directorio de entorno virtual (si lo utilizas)
+venv/
+env/
+
+# Directorio de archivos estáticos generados
+staticfiles/
+
+# Directorio de archivos de medios (si lo tienes)
+media/
+
+# Archivo de migraciones de la base de datos
+*/migrations/
+
+# Archivos de secretos o claves de desarrollo
+secret_key.txt
