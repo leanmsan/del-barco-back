@@ -17,20 +17,16 @@ from datetime import datetime
 
 @method_decorator(csrf_exempt, name="dispatch")
 class RecetaView(View):
-    def get(self, request, id=0, prov=None):
+    def get(self, request, id=0):
         if id > 0:
             recetas = list(Recetas.objects.filter(idreceta=id).values())
             if len(recetas) > 0:
                 receta = recetas[0]
-                datos = {"mensaje": "exito", "receta": recetas}
+                datos = {"mensaje": "exito", "recetas": recetas}
             else:
-                datos = {"mensaje": "No se encontró la receta"}
+                datos = {"mensaje": "No se encontró la receta solicitada"}
         else:
-            if prov:
-                recetas = list(Recetas.objects.filter(idproveedor=prov).values())
-            else:
-                recetas = list(Recetas.objects.values())
-
+            recetas = list(Recetas.objects.values())
             if len(recetas) > 0:
                 datos = {
                     "mensaje": "exito",
