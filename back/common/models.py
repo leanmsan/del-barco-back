@@ -171,7 +171,7 @@ class Insumo(models.Model):
 
 class Proveedor(models.Model):
     idproveedor = models.AutoField(db_column='idProveedor', primary_key=True)  # Field name made lowercase.
-    nombre = models.CharField(max_length=60, blank=True, null=True)
+    nombre = models.CharField(max_length=60, blank=True, null=True, unique=True)
     mail = models.CharField(max_length=80, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     estado = models.CharField(max_length=1, blank=True, null=True)
