@@ -19,19 +19,19 @@ from datetime import datetime
 class RecetaView(View):
     def get(self, request, id=0, prov=None):
         if id > 0:
-            recetas = list(Recetas.objects.filter(idsalida=id).values())
+            recetas = list(Recetas.objects.filter(idreceta=id).values())
             if len(recetas) > 0:
-                salida = recetas[0]
-                datos = {"mensaje": "exito", "salida": recetas}
+                receta = recetas[0]
+                datos = {"mensaje": "exito", "receta": recetas}
             else:
-                datos = {"mensaje": "No se encontró el movimiento de salida"}
+                datos = {"mensaje": "No se encontró la receta"}
         else:
             if prov:
-                salidas = list(Recetas.objects.filter(idproveedor=prov).values())
+                recetas = list(Recetas.objects.filter(idproveedor=prov).values())
             else:
-                salidas = list(Recetas.objects.values())
+                recetas = list(Recetas.objects.values())
 
-            if len(Recetas) > 0:
+            if len(recetas) > 0:
                 datos = {
                     "mensaje": "exito",
                     "cantidad": len(recetas),
@@ -43,14 +43,14 @@ class RecetaView(View):
         return JsonResponse(datos)
 
 
-# VISTA DE SALIDA DETALLE
+# VISTA DE RECETA DETALLE
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class SalidadetalleView(View):
+class RecetadetalleView(View):
     def get(self, request, id=0, insumo=0):
         if id > 0:
-            recetasdet = list(Recetadetalle.objects.filter(idsalida=id).values())
+            recetasdet = list(Recetadetalle.objects.filter(idreceta=id).values())
             if len(recetasdet) > 0:
                 datos = {"mensaje": "exito", "recetas": recetasdet}
             else:
@@ -67,7 +67,7 @@ class SalidadetalleView(View):
                 datos = {
                     "mensaje": "exito",
                     "cantidad": len(recetasdet),
-                    "salidas": recetasdet,
+                    "recetas": recetasdet,
                 }
             else:
                 datos = {"mensaje": "No se encontraron detalles de receta"}
@@ -82,7 +82,7 @@ class SalidadetalleView(View):
         cantidad = int(cantidad)
 
         try:
-            receta = Recetas.objects.get(idsalida=idreceta_id)
+            receta = Recetas.objects.get(idreceta=idreceta_id)
         except Recetas.DoesNotExist:
             receta = None
 
