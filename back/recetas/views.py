@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from common.models import (
-    Recetas,
+    Receta,
     Recetadetalle,
     Insumo,
 )
@@ -19,14 +19,14 @@ from datetime import datetime
 class RecetaView(View):
     def get(self, request, id=0):
         if id > 0:
-            recetas = list(Recetas.objects.filter(idreceta=id).values())
+            recetas = list(Receta.objects.filter(idreceta=id).values())
             if len(recetas) > 0:
                 receta = recetas[0]
                 datos = {"mensaje": "exito", "recetas": recetas}
             else:
                 datos = {"mensaje": "No se encontró la receta solicitada"}
         else:
-            recetas = list(Recetas.objects.values())
+            recetas = list(Receta.objects.values())
             if len(recetas) > 0:
                 datos = {
                     "mensaje": "exito",
@@ -42,12 +42,12 @@ class RecetaView(View):
         jd = json.loads(request.body)
         nombre = jd["nombre"]
         
-        if Recetas.objects.filter(nombre=nombre).exists():
+        if Receta.objects.filter(nombre=nombre).exists():
             datos = {'message': 'El nombre ya está en uso. No se creó la receta.'}
             return JsonResponse(datos, status=400)
         
         else:      
-            recetas = Recetas.objects.create(
+            recetas = Receta.objects.create(
                 nombre=nombre,
                 tipo=jd["tipo"],
                 fecha=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -73,8 +73,8 @@ class RecetaView(View):
                 return JsonResponse(datos, status=400)
 
         try:
-            receta = Recetas.objects.get(idreceta=id)
-        except Recetas.DoesNotExist:
+            receta = Receta.objects.get(idreceta=id)
+        except Receta.DoesNotExist:
             datos = {'mensaje': 'No se encontró la receta'}
             return JsonResponse(datos, status=404)
 
@@ -128,8 +128,8 @@ class RecetadetalleView(View):
         cantidad = int(cantidad)
 
         try:
-            receta = Recetas.objects.get(idreceta=idreceta_id)
-        except Recetas.DoesNotExist:
+            receta = Receta.objects.get(idreceta=idreceta_id)
+        except Receta.DoesNotExist:
             receta = None
 
         if receta:
@@ -165,8 +165,8 @@ class RecetadetalleView(View):
         if 'idreceta' in jd:
             idreceta = jd['idreceta']
             try:
-                receta = Recetas.objects.get(idreceta=idreceta)
-            except Recetas.DoesNotExist:
+                receta = Receta.objects.get(idreceta=idreceta)
+            except Receta.DoesNotExist:
                 datos = {'mensaje': 'La receta especificada no existe'}
                 return JsonResponse(datos, status=404)
 
