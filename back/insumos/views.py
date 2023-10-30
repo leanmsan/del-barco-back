@@ -48,7 +48,14 @@ class InsumoView(View):
             prov = None
 
         if prov:
+
             insumo = Insumo.objects.create(nombre_insumo=nombre_insumo, precio_unitario=jd['precio_unitario'], cantidad_disponible=jd['cantidad_disponible'], tipo_medida=jd['tipo_medida'], categoria=jd['categoria'], proveedor=prov)
+            insumo = Insumo.objects.create(descripcion=descripcion, 
+                                           precio_unitario=jd['precio_unitario'], 
+                                           cantidad_disponible=jd['cantidad_disponible'], 
+                                           tipo_medida=jd['tipo_medida'], 
+                                           categoria=jd['categoria'], 
+                                           proveedor=prov)
             datos = {'message': 'Insumo creado correctamente'}
         else:
             datos = {'message': 'El proveedor no existe'}
