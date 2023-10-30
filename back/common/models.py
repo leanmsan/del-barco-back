@@ -77,14 +77,15 @@ class AuthUserUserPermissions(models.Model):
         unique_together = (('user', 'permission'),)
 
 
-class AuthtokenToken(models.Model):
-    key = models.CharField(primary_key=True, max_length=40)
-    created = models.DateTimeField()
-    user = models.OneToOneField(AuthUser, models.DO_NOTHING)
+class Coccion(models.Model):
+    idcoccion = models.AutoField(db_column='idCoccion', primary_key=True)  # Field name made lowercase.
+    fechacoccion = models.DateField(db_column='fechaCoccion')  # Field name made lowercase.
+    receta = models.ForeignKey('Receta', models.DO_NOTHING, db_column='receta', to_field='nombre')
+    volumenproducido = models.DecimalField(db_column='volumenProducido', max_digits=10, decimal_places=2)  # Field name made lowercase.
 
     class Meta:
         managed = False
-        db_table = 'authtoken_token'
+        db_table = 'coccion'
 
 
 class DjangoAdminLog(models.Model):
@@ -134,7 +135,7 @@ class DjangoSession(models.Model):
 
 class Entrada(models.Model):
     identrada = models.AutoField(db_column='idEntrada', primary_key=True)  # Field name made lowercase.
-    idproveedor = models.ForeignKey('Proveedor', models.DO_NOTHING, db_column='idProveedor', blank=True, null=True)  # Field name made lowercase.
+    proveedor = models.ForeignKey('Proveedor', models.DO_NOTHING, db_column='proveedor', to_field='nombre')
     fecha = models.DateTimeField(blank=True, null=True)
     montototal = models.DecimalField(db_column='montoTotal', max_digits=10, decimal_places=2, blank=True, null=True)  # Field name made lowercase.
 
@@ -144,22 +145,22 @@ class Entrada(models.Model):
 
 
 class Entradadetalle(models.Model):
-    identrada = models.IntegerField(db_column='idEntrada', primary_key=True)  # Field name made lowercase. The composite primary key (idEntrada, idInsumo) found, that is not supported. The first column is selected.
-    idinsumo = models.ForeignKey('Insumo', models.DO_NOTHING, db_column='idInsumo')  # Field name made lowercase.
+    identrada = models.OneToOneField(Entrada, models.DO_NOTHING, db_column='idEntrada', primary_key=True)  # Field name made lowercase. The composite primary key (idEntrada, insumo) found, that is not supported. The first column is selected.
+    insumo = models.ForeignKey('Insumo', models.DO_NOTHING, db_column='insumo', to_field='nombre_insumo')
     cantidad = models.IntegerField()
     preciounitario = models.DecimalField(db_column='precioUnitario', max_digits=10, decimal_places=2, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'entradadetalle'
-        unique_together = (('identrada', 'idinsumo'),)
+        unique_together = (('identrada', 'insumo'),)
 
 
 class Insumo(models.Model):
     idinsumo = models.AutoField(db_column='idInsumo', primary_key=True)  # Field name made lowercase.
-    descripcion = models.CharField(max_length=80, blank=True, null=True)
+    nombre_insumo = models.CharField(unique=True, max_length=80)
     cantidad_disponible = models.IntegerField(blank=True, null=True)
-    tipo_medida = models.CharField(max_length=5, blank=True, null=True)
+    tipo_medida = models.CharField(max_length=10, blank=True, null=True)
     categoria = models.CharField(max_length=20, blank=True, null=True)
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     proveedor = models.ForeignKey('Proveedor', models.DO_NOTHING, db_column='proveedor', to_field='nombre', blank=True, null=True)
@@ -171,7 +172,7 @@ class Insumo(models.Model):
 
 class Proveedor(models.Model):
     idproveedor = models.AutoField(db_column='idProveedor', primary_key=True)  # Field name made lowercase.
-    nombre = models.CharField(max_length=60, blank=True, null=True, unique=True)
+    nombre = models.CharField(max_length=60, unique=True)
     mail = models.CharField(max_length=80, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     estado = models.CharField(max_length=1, blank=True, null=True)
@@ -182,7 +183,7 @@ class Proveedor(models.Model):
 
 
 class PuntoReposicion(models.Model):
-    idpuntoreposicion = models.IntegerField(db_column='idPuntoReposicion', primary_key=True)  # Field name made lowercase.
+    idpuntoreposicion = models.AutoField(db_column='idPuntoReposicion', primary_key=True)  # Field name made lowercase.
     idinsumo = models.ForeignKey(Insumo, models.DO_NOTHING, db_column='idInsumo')  # Field name made lowercase.
     punto_reposicion = models.IntegerField(blank=True, null=True)
     fecha_ultima_compra = models.DateField(blank=True, null=True)
@@ -192,31 +193,31 @@ class PuntoReposicion(models.Model):
         db_table = 'punto_reposicion'
 
 
-class Recetadetalle(models.Model):
-    idreceta = models.IntegerField(db_column='idReceta', primary_key=True)  # Field name made lowercase. The composite primary key (idReceta, idInsumo) found, that is not supported. The first column is selected.
-    idinsumo = models.ForeignKey(Insumo, models.DO_NOTHING, db_column='idInsumo')  # Field name made lowercase.
-    cantidad = models.IntegerField()
-    tipo_medida = models.CharField(max_length=5, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'recetadetalle'
-        unique_together = (('idreceta', 'idinsumo'),)
-
-
-class Recetas(models.Model):
+class Receta(models.Model):
     idreceta = models.IntegerField(db_column='idReceta', primary_key=True)  # Field name made lowercase.
-    nombre = models.CharField(max_length=50)
+    nombre = models.CharField(max_length=50, unique=True)
     tipo = models.CharField(max_length=50)
 
     class Meta:
         managed = False
-        db_table = 'recetas'
+        db_table = 'receta'
+
+
+class Recetadetalle(models.Model):
+    idreceta = models.OneToOneField(Receta, models.DO_NOTHING, db_column='idReceta', primary_key=True)  # Field name made lowercase. The composite primary key (idReceta, insumo) found, that is not supported. The first column is selected.
+    insumo = models.ForeignKey(Insumo, models.DO_NOTHING, db_column='insumo', to_field='nombre_insumo')
+    cantidad = models.IntegerField()
+    tipo_medida = models.CharField(max_length=10, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'recetadetalle'
+        unique_together = (('idreceta', 'insumo'),)
 
 
 class RegistroAlertasStock(models.Model):
     idalerta = models.AutoField(db_column='idAlerta', primary_key=True)  # Field name made lowercase.
-    descripcion_alerta = models.CharField(max_length=25, blank=True, null=True)
+    descripcion_alerta = models.CharField(max_length=100, blank=True, null=True)
     fecha_alerta = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -234,11 +235,11 @@ class Salida(models.Model):
 
 
 class Salidadetalle(models.Model):
-    idsalida = models.IntegerField(db_column='idSalida', primary_key=True)  # Field name made lowercase. The composite primary key (idSalida, idInsumo) found, that is not supported. The first column is selected.
-    idinsumo = models.ForeignKey(Insumo, models.DO_NOTHING, db_column='idInsumo')  # Field name made lowercase.
+    idsalida = models.OneToOneField(Salida, models.DO_NOTHING, db_column='idSalida', primary_key=True)  # Field name made lowercase. The composite primary key (idSalida, insumo) found, that is not supported. The first column is selected.
+    insumo = models.ForeignKey(Insumo, models.DO_NOTHING, db_column='insumo', to_field='nombre_insumo')
     cantidad = models.IntegerField()
 
     class Meta:
         managed = False
         db_table = 'salidadetalle'
-        unique_together = (('idsalida', 'idinsumo'),)
+        unique_together = (('idsalida', 'insumo'),)

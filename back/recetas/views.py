@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from common.models import (
-    Recetas,
+    Receta,
     Recetadetalle,
     Insumo,
 )
