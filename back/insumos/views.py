@@ -10,9 +10,8 @@ from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 import json
 
-# Create your views here.
-
 class InsumoView(View):
+    
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
@@ -36,10 +35,10 @@ class InsumoView(View):
     
     def post(self, request):
         jd = json.loads(request.body)
-        descripcion = jd['descripcion']
+        nombre_insumo = jd['nombre_insumo']
         
-        if Insumo.objects.filter(descripcion=descripcion).exists():
-            datos = {'message': 'La descripción ya existe. No se puede crear el insumo.'}
+        if Insumo.objects.filter(nombre_insumo=nombre_insumo).exists():
+            datos = {'message': 'Este nombre ya existe. No se puede crear el insumo.'}
             return JsonResponse(datos, status=400)
         
         proveedor_id = jd['proveedor_id']
@@ -49,6 +48,8 @@ class InsumoView(View):
             prov = None
 
         if prov:
+
+            insumo = Insumo.objects.create(nombre_insumo=nombre_insumo, precio_unitario=jd['precio_unitario'], cantidad_disponible=jd['cantidad_disponible'], tipo_medida=jd['tipo_medida'], categoria=jd['categoria'], proveedor=prov)
             insumo = Insumo.objects.create(descripcion=descripcion, 
                                            precio_unitario=jd['precio_unitario'], 
                                            cantidad_disponible=jd['cantidad_disponible'], 
@@ -58,25 +59,26 @@ class InsumoView(View):
             datos = {'message': 'Insumo creado correctamente'}
         else:
             datos = {'message': 'El proveedor no existe'}
+            return JsonResponse(datos, status=400)
         
         return JsonResponse(datos)
 
 
     def patch(self, request, id):
         jd = json.loads(request.body)
-        descripcion = jd.get('descripcion', None)
+        nombre_insumo = jd.get('nombre_insumo', None)
 
-        if descripcion:
-            insumos_con_misma_descripcion = Insumo.objects.filter(descripcion=descripcion).exclude(idinsumo=id)
+        if nombre_insumo:
+            insumos_con_mismo_nombre = Insumo.objects.filter(nombre_insumo=nombre_insumo).exclude(idinsumo=id)
 
-            if insumos_con_misma_descripcion.exists():
-                datos = {'mensaje': 'La descripción ya existe en otro insumo. No se puede actualizar.'}
+            if insumos_con_mismo_nombre.exists():
+                datos = {'message': 'El nombre ya existe en otro insumo. No se puede actualizar.'}
                 return JsonResponse(datos, status=400)
 
         try:
             insumo = Insumo.objects.get(idinsumo=id)
         except Insumo.DoesNotExist:
-            datos = {'mensaje': 'No se encontró el insumo'}
+            datos = {'message': 'No se encontró el insumo'}
             return JsonResponse(datos, status=404)
 
         for field_name, field_value in jd.items():
@@ -85,5 +87,5 @@ class InsumoView(View):
 
         insumo.save()
 
-        datos = {'mensaje': 'Insumo actualizado correctamente'}
+        datos = {'message': 'Insumo actualizado correctamente'}
         return JsonResponse(datos)
