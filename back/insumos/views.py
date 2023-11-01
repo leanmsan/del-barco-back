@@ -22,16 +22,18 @@ class InsumoView(View):
             if len(insumos) > 0:
                 insumo = insumos[0]
                 datos = {'message': 'exito', 'insumo': insumo}
+                return JsonResponse(datos, status=200)
             else:
                 datos = {'message': 'No se encontró el insumo'}
-            return JsonResponse(datos)
+                return JsonResponse(datos, status=404)
         else:
             insumos = list(Insumo.objects.values())
             if len(insumos) > 0:
                 datos = {'message': 'exito', 'cantidad': len(insumos), 'insumos': insumos}
+                return JsonResponse(datos, status=200)
             else:
                 datos = {'message': 'No se encontraron insumos'}
-        return JsonResponse(datos)
+                return JsonResponse(datos, status=404)
     
     def post(self, request):
         jd = json.loads(request.body)
@@ -40,28 +42,21 @@ class InsumoView(View):
         if Insumo.objects.filter(nombre_insumo=nombre_insumo).exists():
             datos = {'message': 'Este nombre ya existe. No se puede crear el insumo.'}
             return JsonResponse(datos, status=400)
-        
+
         proveedor_id = jd['proveedor_id']
         try:
             prov = Proveedor.objects.get(nombre=proveedor_id)
         except Proveedor.DoesNotExist:
-            prov = None
+            proveedor = None
 
-        if prov:
+        if proveedor:
 
             insumo = Insumo.objects.create(nombre_insumo=nombre_insumo, precio_unitario=jd['precio_unitario'], cantidad_disponible=jd['cantidad_disponible'], tipo_medida=jd['tipo_medida'], categoria=jd['categoria'], proveedor=prov)
-            insumo = Insumo.objects.create(descripcion=descripcion, 
-                                           precio_unitario=jd['precio_unitario'], 
-                                           cantidad_disponible=jd['cantidad_disponible'], 
-                                           tipo_medida=jd['tipo_medida'], 
-                                           categoria=jd['categoria'], 
-                                           proveedor=prov)
             datos = {'message': 'Insumo creado correctamente'}
+            return JsonResponse(datos, status=200)
         else:
             datos = {'message': 'El proveedor no existe'}
             return JsonResponse(datos, status=400)
-        
-        return JsonResponse(datos)
 
 
     def patch(self, request, id):
