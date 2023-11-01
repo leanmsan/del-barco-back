@@ -127,7 +127,7 @@ class EntradadetalleView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SalidaView(View):
-    def get(self, request, id=0, prov=None):
+    def get(self, request, id=0):
         if id > 0:
             salidas = list(Salida.objects.filter(idsalida=id).values())
             if len(salidas) > 0:
@@ -138,11 +138,7 @@ class SalidaView(View):
                 datos = {"message": "No se encontró el movimiento de salida"}
                 return JsonResponse(datos, status=404)
         else:
-            if prov:
-                salidas = list(Salida.objects.filter(idproveedor=prov).values())
-            else:
-                salidas = list(Salida.objects.values())
-
+            salidas = list(Salida.objects.values())
             if len(salidas) > 0:
                 datos = {
                     "message": "exito",
@@ -174,7 +170,7 @@ class SalidadetalleView(View):
     def get(self, request, id=0):
         if id > 0:
             salidasdet = list(Salidadetalle.objects.filter(idsalida=id).values())
-            if len(entradasdet):
+            if len(salidasdet):
                 datos = {"message": "exito", "salidas": salidasdet}
                 return JsonResponse(datos, status=200)
             else:

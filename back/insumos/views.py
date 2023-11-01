@@ -45,13 +45,13 @@ class InsumoView(View):
 
         proveedor_id = jd['proveedor_id']
         try:
-            prov = Proveedor.objects.get(nombre=proveedor_id)
+            proveedor = Proveedor.objects.get(nombre=proveedor_id)
         except Proveedor.DoesNotExist:
             proveedor = None
 
         if proveedor:
 
-            insumo = Insumo.objects.create(nombre_insumo=nombre_insumo, precio_unitario=jd['precio_unitario'], cantidad_disponible=jd['cantidad_disponible'], tipo_medida=jd['tipo_medida'], categoria=jd['categoria'], proveedor=prov)
+            insumo = Insumo.objects.create(nombre_insumo=nombre_insumo, precio_unitario=jd['precio_unitario'], cantidad_disponible=jd['cantidad_disponible'], tipo_medida=jd['tipo_medida'], categoria=jd['categoria'], proveedor=proveedor)
             datos = {'message': 'Insumo creado correctamente'}
             return JsonResponse(datos, status=200)
         else:

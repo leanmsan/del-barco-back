@@ -80,7 +80,7 @@ class AuthUserUserPermissions(models.Model):
 class Coccion(models.Model):
     idcoccion = models.AutoField(db_column='idCoccion', primary_key=True)  # Field name made lowercase.
     fecha_coccion = models.DateField()
-    receta = models.ForeignKey('Receta', models.DO_NOTHING, db_column='receta', to_field='nombre')
+    receta = models.ForeignKey('Receta', models.DO_NOTHING, db_column='receta', to_field='nombre_receta')
     volumen_producido = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
@@ -135,7 +135,7 @@ class DjangoSession(models.Model):
 
 class Entrada(models.Model):
     identrada = models.AutoField(db_column='idEntrada', primary_key=True)  # Field name made lowercase.
-    proveedor = models.ForeignKey('Proveedor', models.DO_NOTHING, db_column='proveedor', to_field='nombre')
+    proveedor = models.ForeignKey('Proveedor', models.DO_NOTHING, db_column='proveedor', to_field='nombre_proveedor')
     fecha_entrada = models.DateTimeField(blank=True, null=True)
     monto_total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
@@ -163,7 +163,7 @@ class Insumo(models.Model):
     tipo_medida = models.CharField(max_length=10, blank=True, null=True)
     categoria = models.CharField(max_length=20, blank=True, null=True)
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    proveedor = models.ForeignKey('Proveedor', models.DO_NOTHING, db_column='proveedor', to_field='nombre', blank=True, null=True)
+    proveedor = models.ForeignKey('Proveedor', models.DO_NOTHING, db_column='proveedor', to_field='nombre_proveedor', blank=True, null=True)
 
     class Meta:
         managed = False
@@ -172,7 +172,7 @@ class Insumo(models.Model):
 
 class Proveedor(models.Model):
     idproveedor = models.AutoField(db_column='idProveedor', primary_key=True)  # Field name made lowercase.
-    nombre = models.CharField(max_length=60, unique=True)
+    nombre_proveedor = models.CharField(max_length=60, unique=True)
     mail = models.CharField(max_length=80, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     estado = models.CharField(max_length=1, blank=True, null=True)
@@ -195,7 +195,7 @@ class PuntoReposicion(models.Model):
 
 class Receta(models.Model):
     idreceta = models.IntegerField(db_column='idReceta', primary_key=True)  # Field name made lowercase.
-    nombre = models.CharField(max_length=50, unique=True)
+    nombre_receta = models.CharField(max_length=50, unique=True)
     tipo = models.CharField(max_length=50)
 
     class Meta:
@@ -204,7 +204,7 @@ class Receta(models.Model):
 
 
 class Recetadetalle(models.Model):
-    idreceta = models.OneToOneField(Receta, models.DO_NOTHING, db_column='idReceta', primary_key=True)  # Field name made lowercase. The composite primary key (idReceta, insumo) found, that is not supported. The first column is selected.
+    receta = models.OneToOneField(Receta, models.DO_NOTHING, db_column='receta', primary_key=True)  # The composite primary key (receta, insumo) found, that is not supported. The first column is selected.
     insumo = models.ForeignKey(Insumo, models.DO_NOTHING, db_column='insumo', to_field='nombre_insumo')
     cantidad = models.IntegerField()
     tipo_medida = models.CharField(max_length=10, blank=True, null=True)
@@ -212,7 +212,7 @@ class Recetadetalle(models.Model):
     class Meta:
         managed = False
         db_table = 'recetadetalle'
-        unique_together = (('idreceta', 'insumo'),)
+        unique_together = (('receta', 'insumo'),)
 
 
 class RegistroAlertasStock(models.Model):
