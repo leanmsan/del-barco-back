@@ -34,21 +34,21 @@ class ProveedorView(View):
 
     def post(self,request):
         jd = json.loads(request.body)
-        nombre= jd['nombre']
-        if Proveedor.objects.filter(nombre=nombre).exists():
+        nombre_proveedor= jd['nombre_proveedor']
+        if Proveedor.objects.filter(nombre_proveedor=nombre_proveedor).exists():
             datos = {'message': 'Proveedor ya existente'}
             return JsonResponse(datos, status=400)
         else:
-            Proveedor.objects.create(nombre= jd['nombre'], mail = jd['mail'], telefono = jd['telefono'], estado = 'A')
+            Proveedor.objects.create(nombre_proveedor= jd['nombre_proveedor'], mail = jd['mail'], telefono = jd['telefono'], estado = 'A')
             datos = {'message': 'success'}
         return JsonResponse(datos, status=201)
 
     def patch(self,request,id):
         jd = json.loads(request.body)
-        nombre = jd.get('nombre', None)
+        nombre_proveedor = jd.get('nombre_proveedor', None)
 
-        if nombre:
-            proveedor_con_mismo_nombre = Proveedor.objects.filter(nombre=nombre).exclude(idproveedor=id)
+        if nombre_proveedor:
+            proveedor_con_mismo_nombre = Proveedor.objects.filter(nombre_proveedor=nombre_proveedor).exclude(idproveedor=id)
 
             if proveedor_con_mismo_nombre.exists():
                 datos = {'message': 'El nombre ya existe en otro proveedor. No se puede actualizar.'}
