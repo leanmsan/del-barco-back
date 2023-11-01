@@ -25,53 +25,38 @@ class EntradaView(View):
             entradas = list(Entrada.objects.filter(identrada=id).values())
             if len(entradas) > 0:
                 entrada = entradas[0]
-                datos = {"mensaje": "exito", "entrada": entrada}
+                datos = {"message": "exito", "entrada": entrada}
             else:
-                datos = {"mensaje": "No se encontró el movimiento de entrada"}
+                datos = {"message": "No se encontró el movimiento de entrada"}
         else:
-            if prov:
-                entradas = list(Entrada.objects.filter(idproveedor=prov).values())
-            else:
-                entradas = list(Entrada.objects.values())
-
+            entradas = list(Entrada.objects.values())
             if len(entradas) > 0:
                 datos = {
-                    "mensaje": "exito",
-                    "cantidad": len(entradas),
-                    "entradas": entradas,
-                }
+                    "message": "exito", "cantidad": len(entradas), "entradas": entradas}
             else:
-                datos = {"mensaje": "No se encontraron movimientos de entrada"}
-
+                datos = {"message": "No se encontraron movimientos de entrada"}
         return JsonResponse(datos)
 
     def post(self, request):
         jd = json.loads(request.body)
-        idproveedor_id = jd["idproveedor_id"]
+        proveedor_id = jd["proveedor_id"]
 
         try:
-            idproveedor = Proveedor.objects.get(idproveedor=idproveedor_id)
+            proveedor = Proveedor.objects.get(nombre=proveedor_id)
         except Proveedor.DoesNotExist:
-            idproveedor = None
+            proveedor = None
 
-        if idproveedor:
-            entrada = Entrada.objects.create(
-                idproveedor=idproveedor,
-                fecha=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                montototal=jd["montototal"],
-            )
+        if proveedor:
+            entrada = Entrada.objects.create(proveedor=proveedor, fecha_entrada=datetime.now().strftime("%d-%m-%Y %H:%M:%S"), monto_total=jd["monto_total"])
             last_inserted_id = entrada.identrada
-
-            datos = {
-                "mensaje": "success",
-                "last_inserted_id": last_inserted_id,
-            }
+            datos = {"message": "success", "last_inserted_id": last_inserted_id}
         else:
-            datos = {"mensaje": "El proveedor no existe"}
-
+            datos = {"message": "El proveedor no existe"}
+            return JsonResponse(datos, status=400)
+        
         return JsonResponse(datos)
 
-    def put(self, request, id):
+    def patch(self, request, id):
         pass
 
 
@@ -79,36 +64,32 @@ class EntradaView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class EntradadetalleView(View):
-    def get(self, request, id=0, insumo=0):
+    def get(self, request, id=0):
         if id > 0:
             entradasdet = list(Entradadetalle.objects.filter(identrada=id).values())
             if len(entradasdet):
-                datos = {"mensaje": "exito", "entradas": entradasdet}
+                datos = {"message": "exito", "entradas": entradasdet}
+                return JsonResponse(datos, status=200)
             else:
-                datos = {"mensaje": "No se encontró el id de entrada"}
-            return JsonResponse(datos)
+                datos = {"message": "No se encontró el id de entrada"}
+                return JsonResponse(datos, status=404)
         else:
-            if insumo:
-                entradasdet = list(
-                    Entradadetalle.objects.filter(idInsumo=insumo).values()
-                )
-            else:
-                entradasdet = list(Entradadetalle.objects.values())
-
+            entradasdet = list(Entradadetalle.objects.values())
             if len(entradasdet) > 0:
                 datos = {
-                    "mensaje": "exito",
+                    "message": "exito",
                     "cantidad": len(entradasdet),
                     "entradas": entradasdet,
                 }
+                return JsonResponse(datos, status=200)
             else:
-                datos = {"mensaje": "No se encontraron detalles de entrada"}
-            return JsonResponse(datos)
+                datos = {"message": "No se encontraron detalles de entrada"}
+                return JsonResponse(datos, status=404)
 
     def post(self, request):
         jd = json.loads(request.body)
         identrada_id = jd["identrada_id"]
-        idinsumo_id = jd["idinsumo_id"]
+        insumo_id = jd["insumo_id"]
 
         try:
             identrada = Entrada.objects.get(identrada=int(identrada_id))
@@ -117,24 +98,25 @@ class EntradadetalleView(View):
 
         if identrada:
             try:
-                idinsumo = Insumo.objects.get(idinsumo=idinsumo_id)
+                insumo = Insumo.objects.get(nombre_insumo=insumo_id)
             except Insumo.DoesNotExist:
-                idInsumo = None
+                insumo = None
 
-            if idinsumo:
+            if insumo:
                 entrada = Entradadetalle.objects.create(
                     identrada=identrada,
-                    idInsumo=idinsumo,
+                    insumo=insumo,
                     cantidad=jd["cantidad"],
-                    preciounitario=jd["preciounitario"],
+                    precio_unitario=jd["precio_unitario"],
                 )
-                datos = {"mensaje": "success"}
+                datos = {"message": "success"}
+                return JsonResponse(datos, status=200)
             else:
-                datos = {"mensaje": "El insumo no existe"}
+                datos = {"message": "El insumo no existe"}
+                return JsonResponse(datos, status=400)
         else:
-            datos = {"mensaje": "La entrada no existe"}
-
-        return JsonResponse(datos)
+            datos = {"message": "La entrada no existe"}
+            return JsonResponse(datos, status=400)
 
     def put(self, request, id):
         pass
@@ -150,9 +132,11 @@ class SalidaView(View):
             salidas = list(Salida.objects.filter(idsalida=id).values())
             if len(salidas) > 0:
                 salida = salidas[0]
-                datos = {"mensaje": "exito", "salida": salida}
+                datos = {"message": "exito", "salida": salida}
+                return JsonResponse(datos, status=200)
             else:
-                datos = {"mensaje": "No se encontró el movimiento de salida"}
+                datos = {"message": "No se encontró el movimiento de salida"}
+                return JsonResponse(datos, status=404)
         else:
             if prov:
                 salidas = list(Salida.objects.filter(idproveedor=prov).values())
@@ -161,39 +145,22 @@ class SalidaView(View):
 
             if len(salidas) > 0:
                 datos = {
-                    "mensaje": "exito",
+                    "message": "exito",
                     "cantidad": len(salidas),
                     "salidas": salidas,
                 }
+                return JsonResponse(datos, status=200)
             else:
-                datos = {"mensaje": "No se encontraron movimientos de salida"}
-
-        return JsonResponse(datos)
+                datos = {"message": "No se encontraron movimientos de salida"}
+                return JsonResponse(datos, status=400)
 
     def post(self, request):
         jd = json.loads(request.body)
-        idproveedor_id = jd["idproveedor_id"]
-        try:
-            idproveedor = Proveedor.objects.get(idproveedor=idproveedor_id)
-        except Proveedor.DoesNotExist:
-            idproveedor = None
+        salida = Salida.objects.create(fecha_salida=datetime.now().strftime("%d-%m-%Y %H:%M:%S"), monto_total=jd["monto_total"])
+        last_inserted_id = salida.idsalida
+        datos = {"message": "success", "last_inserted_id": last_inserted_id}
+        return JsonResponse(datos, status=200)
 
-        if idproveedor:
-            entrada = Entrada.objects.create(
-                idproveedor=idproveedor,
-                fecha=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                montototal=jd["montototal"],
-            )
-            last_inserted_id = entrada.identrada
-
-            datos = {
-                "mensaje": "success",
-                "last_inserted_id": last_inserted_id,
-            }
-        else:
-            datos = {"mensaje": "El proveedor no existe"}
-
-        return JsonResponse(datos)
 
     def put(self, request, id):
         pass
@@ -204,68 +171,59 @@ class SalidaView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SalidadetalleView(View):
-    def get(self, request, id=0, insumo=0):
+    def get(self, request, id=0):
         if id > 0:
             salidasdet = list(Salidadetalle.objects.filter(idsalida=id).values())
-            if len(salidasdet) > 0:
-                datos = {"mensaje": "exito", "salidas": salidasdet}
+            if len(entradasdet):
+                datos = {"message": "exito", "salidas": salidasdet}
+                return JsonResponse(datos, status=200)
             else:
-                datos = {"mensaje": "No se encontró el ID de salida"}
+                datos = {"message": "No se encontró el id de salida"}
+                return JsonResponse(datos, status=404)
         else:
-            if insumo:
-                salidasdet = list(
-                    Salidadetalle.objects.filter(idinsumo=insumo).values()
-                )
-            else:
-                salidasdet = list(Salidadetalle.objects.values())
-
+            salidasdet = list(Salidadetalle.objects.values())
             if len(salidasdet) > 0:
                 datos = {
-                    "mensaje": "exito",
+                    "message": "exito",
                     "cantidad": len(salidasdet),
                     "salidas": salidasdet,
                 }
+                return JsonResponse(datos, status=200)
             else:
-                datos = {"mensaje": "No se encontraron detalles de salida"}
-
-        return JsonResponse(datos)
+                datos = {"message": "No se encontraron detalles de salida"}
+                return JsonResponse(datos, status=404)
 
     def post(self, request):
         jd = json.loads(request.body)
         idsalida_id = jd["idsalida_id"]
-        idinsumo_id = jd["idinsumo_id"]
-        cantidad = jd["cantidad"]
-        cantidad = int(cantidad)
+        insumo_id = jd["insumo_id"]
 
         try:
-            salida = Salida.objects.get(idsalida=idsalida_id)
+            idsalida = Entrada.objects.get(idsalida=int(idsalida_id))
         except Salida.DoesNotExist:
-            salida = None
+            idsalida = None
 
-        if salida:
+        if idsalida:
             try:
-                insumo = Insumo.objects.get(idinsumo=idinsumo_id)
+                insumo = Insumo.objects.get(nombre_insumo=insumo_id)
             except Insumo.DoesNotExist:
                 insumo = None
 
             if insumo:
-                if insumo.cantidad_disponible >= cantidad:
-                    salidadetalle = Salidadetalle.objects.create(
-                        idsalida=salida,
-                        idinsumo=insumo,
-                        cantidad=cantidad,
-                        preciounitario=jd["preciounitario"],
-                    )
-                    datos = {"mensaje": "success"}
-                else:
-                    datos = {
-                        "mensaje": "No hay suficiente stock disponible para realizar la salida"
-                    }
+                salida = Salidadetalle.objects.create(
+                    idsalida=idsalida,
+                    insumo=insumo,
+                    cantidad=jd["cantidad"],
+                    precio_unitario=jd["precio_unitario"],
+                )
+                datos = {"message": "success"}
+                return JsonResponse(datos, status=200)
             else:
-                datos = {"mensaje": "El insumo no existe"}
+                datos = {"message": "El insumo no existe"}
+                return JsonResponse(datos, status=400)
         else:
-            datos = {"mensaje": "La salida no existe"}
-        return JsonResponse(datos)
+            datos = {"message": "La salida no existe"}
+            return JsonResponse(datos, status=400)
 
     def put(self, request, id):
         pass
