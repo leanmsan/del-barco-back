@@ -45,7 +45,7 @@ class InsumoView(View):
 
         proveedor_id = jd['proveedor_id']
         try:
-            proveedor = Proveedor.objects.get(nombre=proveedor_id)
+            proveedor = Proveedor.objects.get(nombre_proveedor=proveedor_id)
         except Proveedor.DoesNotExist:
             proveedor = None
 
@@ -75,7 +75,15 @@ class InsumoView(View):
         except Insumo.DoesNotExist:
             datos = {'message': 'No se encontró el insumo'}
             return JsonResponse(datos, status=404)
-
+        proveedor_id = jd['proveedor_id']
+        
+        if proveedor_id:
+            if Proveedor.objects.get(nombre_proveedor=proveedor_id):
+                a = 2 + 2
+            else:
+                datos = {'message': 'El proveedor proporcionado no existe'}
+                return JsonResponse(datos, status=404)
+            
         for field_name, field_value in jd.items():
             if hasattr(insumo, field_name):
                 setattr(insumo, field_name, field_value)
@@ -83,4 +91,4 @@ class InsumoView(View):
         insumo.save()
 
         datos = {'message': 'Insumo actualizado correctamente'}
-        return JsonResponse(datos)
+        return JsonResponse(datos, status= 200)
