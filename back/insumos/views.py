@@ -61,33 +61,34 @@ class InsumoView(View):
 
     def patch(self, request, id):
         jd = json.loads(request.body)
-        nombre_insumo = jd.get('nombre_insumo', None)
-
-        if nombre_insumo:
-            insumos_con_mismo_nombre = Insumo.objects.filter(nombre_insumo=nombre_insumo).exclude(idinsumo=id)
-
-            if insumos_con_mismo_nombre.exists():
-                datos = {'message': 'El nombre ya existe en otro insumo. No se puede actualizar.'}
-                return JsonResponse(datos, status=400)
-
+        
         try:
             insumo = Insumo.objects.get(idinsumo=id)
         except Insumo.DoesNotExist:
             datos = {'message': 'No se encontró el insumo'}
             return JsonResponse(datos, status=404)
-        proveedor_id = jd['proveedor_id']
+        
+        nombre_insumo = jd.get('nombre_insumo', None)
+        if nombre_insumo:
+            insumos_con_mismo_nombre = Insumo.objects.filter(nombre_insumo=nombre_insumo).exclude(idinsumo=id)
+            if insumos_con_mismo_nombre.exists():
+                datos = {'message': 'El nombre ya existe en otro insumo. No se puede actualizar.'}
+                return JsonResponse(datos, status=400)
+
+        
+        proveedor_id = jd.get('proveedor_id', None)
         
         if proveedor_id:
-            if Proveedor.objects.get(nombre_proveedor=proveedor_id):
-                a = 2 + 2
-            else:
+            try:
+                proveedor_real = Proveedor.objects.get(nombre_proveedor=proveedor_id)
+                insumo.proveedor = proveedor_real
+            except Proveedor.DoesNotExist:
                 datos = {'message': 'El proveedor proporcionado no existe'}
                 return JsonResponse(datos, status=404)
             
         for field_name, field_value in jd.items():
-            if hasattr(insumo, field_name):
+            if field_name != 'proveedor_id' and hasattr(insumo, field_name):
                 setattr(insumo, field_name, field_value)
-
         insumo.save()
 
         datos = {'message': 'Insumo actualizado correctamente'}

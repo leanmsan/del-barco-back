@@ -228,7 +228,8 @@ class RegistroAlertasStock(models.Model):
 class Salida(models.Model):
     idsalida = models.AutoField(db_column='idSalida', primary_key=True)  # Field name made lowercase.
     fecha_salida = models.DateTimeField(blank=True, null=True)
-
+    descripcion = models.CharField(max_length=100, blank=True, null=True)
+    
     class Meta:
         managed = False
         db_table = 'salida'
