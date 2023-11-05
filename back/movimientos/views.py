@@ -13,8 +13,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 import json
+from django.utils import timezone
 from datetime import datetime
-
 
 # VISTA DE ENTRADA
 
@@ -40,14 +40,15 @@ class EntradaView(View):
     def post(self, request):
         jd = json.loads(request.body)
         proveedor_id = jd["proveedor_id"]
-
+        fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
         try:
-            proveedor = Proveedor.objects.get(nombre=proveedor_id)
+            proveedor = Proveedor.objects.get(nombre_proveedor=proveedor_id)
         except Proveedor.DoesNotExist:
             proveedor = None
 
         if proveedor:
-            entrada = Entrada.objects.create(proveedor=proveedor, fecha_entrada=datetime.now().strftime("%d-%m-%Y %H:%M:%S"), monto_total=jd["monto_total"])
+            entrada = Entrada.objects.create(proveedor=proveedor, fecha_entrada=fecha, monto_total=0)
             last_inserted_id = entrada.identrada
             datos = {"message": "success", "last_inserted_id": last_inserted_id}
         else:
@@ -152,7 +153,8 @@ class SalidaView(View):
 
     def post(self, request):
         jd = json.loads(request.body)
-        salida = Salida.objects.create(fecha_salida=datetime.now().strftime("%d-%m-%Y %H:%M:%S"), monto_total=jd["monto_total"])
+        fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        salida = Salida.objects.create(fecha_salida=fecha, descripcion=jd["descripcion"])
         last_inserted_id = salida.idsalida
         datos = {"message": "success", "last_inserted_id": last_inserted_id}
         return JsonResponse(datos, status=200)
