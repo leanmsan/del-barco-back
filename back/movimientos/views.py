@@ -48,7 +48,7 @@ class EntradaView(View):
             proveedor = None
 
         if proveedor:
-            entrada = Entrada.objects.create(proveedor=proveedor, fecha_entrada=fecha, monto_total=0, descripcion=jd.get("descripcion", None))
+            entrada = Entrada.objects.create(proveedor=proveedor, fecha_entrada=fecha, monto_total=0)
             last_inserted_id = entrada.identrada
             datos = {"message": "success", "last_inserted_id": last_inserted_id}
         else:
@@ -90,7 +90,7 @@ class EntradadetalleView(View):
     def post(self, request):
         jd = json.loads(request.body)
         identrada_id = jd["identrada_id"]
-        insumo_nombre = jd["insumo_id"]
+        insumo_id = jd["insumo_id"]
         cantidad = jd["cantidad"]
         try:
             identrada = Entrada.objects.get(identrada=int(identrada_id))
@@ -99,7 +99,7 @@ class EntradadetalleView(View):
 
         if identrada:
             try:
-                insumo = Insumo.objects.get(nombre_insumo=insumo_nombre)
+                insumo = Insumo.objects.get(nombre_insumo=insumo_id)
             except Insumo.DoesNotExist:
                 insumo = None
 
@@ -107,7 +107,8 @@ class EntradadetalleView(View):
                 entrada = Entradadetalle.objects.create(
                     identrada=identrada,
                     insumo=insumo,
-                    cantidad=cantidad
+                    cantidad=cantidad,
+                    precio_unitario=jd["precio_unitario"]
                 )
                 datos = {"message": "success"}
                 return JsonResponse(datos, status=200)
@@ -210,9 +211,11 @@ class SalidadetalleView(View):
                 if insumo.cantidad_disponible >= cantidad:
                     salida = Salidadetalle.objects.create(
                         idsalida=idsalida,
-                        insumo=insumo,
+                        insumo=insumo_id,
                         cantidad=cantidad
                     )
+                    insumo.cantidad_disponible -= cantidad;
+                    insumo.save
                     datos = {"message": "success"}
                     return JsonResponse(datos, status=200)
                 else:
