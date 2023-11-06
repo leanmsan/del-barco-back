@@ -40,7 +40,7 @@ class EntradaView(View):
     def post(self, request):
         jd = json.loads(request.body)
         proveedor_id = jd["proveedor_id"]
-        fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        fecha = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
         
         try:
             proveedor = Proveedor.objects.get(nombre_proveedor=proveedor_id)
@@ -48,7 +48,7 @@ class EntradaView(View):
             proveedor = None
 
         if proveedor:
-            entrada = Entrada.objects.create(proveedor=proveedor, fecha_entrada=fecha, monto_total=0)
+            entrada = Entrada.objects.create(proveedor=proveedor, fecha_entrada=fecha, monto_total=0, descripcion=jd.get("descripcion", None))
             last_inserted_id = entrada.identrada
             datos = {"message": "success", "last_inserted_id": last_inserted_id}
         else:
@@ -90,8 +90,8 @@ class EntradadetalleView(View):
     def post(self, request):
         jd = json.loads(request.body)
         identrada_id = jd["identrada_id"]
-        insumo_id = jd["insumo_id"]
-
+        insumo_nombre = jd["insumo_id"]
+        cantidad = jd["cantidad"]
         try:
             identrada = Entrada.objects.get(identrada=int(identrada_id))
         except Entrada.DoesNotExist:
@@ -99,7 +99,7 @@ class EntradadetalleView(View):
 
         if identrada:
             try:
-                insumo = Insumo.objects.get(nombre_insumo=insumo_id)
+                insumo = Insumo.objects.get(nombre_insumo=insumo_nombre)
             except Insumo.DoesNotExist:
                 insumo = None
 
@@ -107,8 +107,7 @@ class EntradadetalleView(View):
                 entrada = Entradadetalle.objects.create(
                     identrada=identrada,
                     insumo=insumo,
-                    cantidad=jd["cantidad"],
-                    precio_unitario=jd["precio_unitario"],
+                    cantidad=cantidad
                 )
                 datos = {"message": "success"}
                 return JsonResponse(datos, status=200)
@@ -153,8 +152,8 @@ class SalidaView(View):
 
     def post(self, request):
         jd = json.loads(request.body)
-        fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        salida = Salida.objects.create(fecha_salida=fecha, descripcion=jd["descripcion"])
+        fecha = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        salida = Salida.objects.create(fecha_salida=fecha, descripcion=jd.get("descripcion", None))
         last_inserted_id = salida.idsalida
         datos = {"message": "success", "last_inserted_id": last_inserted_id}
         return JsonResponse(datos, status=200)
@@ -195,7 +194,7 @@ class SalidadetalleView(View):
         jd = json.loads(request.body)
         idsalida_id = jd["idsalida_id"]
         insumo_id = jd["insumo_id"]
-
+        cantidad = jd["cantidad"]
         try:
             idsalida = Salida.objects.get(idsalida=int(idsalida_id))
         except Salida.DoesNotExist:
@@ -208,14 +207,17 @@ class SalidadetalleView(View):
                 insumo = None
 
             if insumo:
-                salida = Salidadetalle.objects.create(
-                    idsalida=idsalida,
-                    insumo=insumo,
-                    cantidad=jd["cantidad"],
-                    precio_unitario=jd["precio_unitario"],
-                )
-                datos = {"message": "success"}
-                return JsonResponse(datos, status=200)
+                if insumo.cantidad_disponible >= cantidad:
+                    salida = Salidadetalle.objects.create(
+                        idsalida=idsalida,
+                        insumo=insumo,
+                        cantidad=cantidad
+                    )
+                    datos = {"message": "success"}
+                    return JsonResponse(datos, status=200)
+                else:
+                    datos = {"message": "No hay suficiente stock de este insumo"}
+                    return JsonResponse(datos, status=400)
             else:
                 datos = {"message": "El insumo no existe"}
                 return JsonResponse(datos, status=400)
