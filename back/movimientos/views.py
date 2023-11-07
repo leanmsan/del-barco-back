@@ -60,6 +60,14 @@ class EntradaView(View):
     def patch(self, request, id):
         pass
 
+@method_decorator(csrf_exempt, name="dispatch")
+class GetLastIdEntradaView(View):
+    #get para obtener el ultimo id
+    def get(self, request):
+        entrada = Entrada.objects.latest('identrada')
+        lastId = entrada.identrada
+        lastIdEntrada = {"message": "exito", "lastid": lastId}
+        return JsonResponse(lastIdEntrada)
 
 # VISTA DE ENTRADA DETALLE
 
