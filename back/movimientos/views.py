@@ -41,6 +41,7 @@ class EntradaView(View):
         jd = json.loads(request.body)
         proveedor_id = jd["proveedor_id"]
         fecha = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        montoTotal = jd["monto_total"]
         
         try:
             proveedor = Proveedor.objects.get(nombre_proveedor=proveedor_id)
@@ -48,7 +49,7 @@ class EntradaView(View):
             proveedor = None
 
         if proveedor:
-            entrada = Entrada.objects.create(proveedor=proveedor, fecha_entrada=fecha, monto_total=0)
+            entrada = Entrada.objects.create(proveedor=proveedor, fecha_entrada=fecha, monto_total=montoTotal)
             last_inserted_id = entrada.identrada
             datos = {"message": "success", "last_inserted_id": last_inserted_id}
         else:
