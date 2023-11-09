@@ -55,14 +55,13 @@ class RecetaView(View):
         else:      
             recetas = Receta.objects.create(
                 nombre_receta=nombre_receta,
-                tipo=jd["tipo"],
-                fecha=datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                tipo=jd["tipo"]
             )
-            last_inserted_id = recetas.idreceta
+            last_inserted_receta = recetas.nombre_receta
 
             datos = {
                 "message": "Se creó la receta con éxito",
-                "last_inserted_id": last_inserted_id
+                "last_inserted_receta": last_inserted_receta
             }
             return JsonResponse(datos, status=200)
 
@@ -93,9 +92,9 @@ class RecetaView(View):
 @method_decorator(csrf_exempt, name="dispatch")
 class RecetadetalleView(View):
 
-    def get(self, request, id=0):
-        if id > 0:
-            recetasdet = list(Recetadetalle.objects.filter(idreceta=id).values())
+    def get(self, request, nombre_receta=0):
+        if nombre_receta > 0:
+            recetasdet = list(Recetadetalle.objects.filter(receta=nombre_receta).values())
             if len(recetasdet) > 0:
                 datos = {"message": "exito", "recetas": recetasdet}
                 return JsonResponse(datos, status=200)
@@ -124,23 +123,18 @@ class RecetadetalleView(View):
         cantidad = int(cantidad)
 
         try:
-            receta = Receta.objects.get(receta=receta_id)
+            receta = Receta.objects.get(nombre_receta=receta_id)
         except Receta.DoesNotExist:
             receta = None
 
         if receta:
             try:
-                insumo = Insumo.objects.get(insumo=insumo_id)
+                insumo = Insumo.objects.get(nombre_insumo=insumo_id)
             except Insumo.DoesNotExist:
                 insumo = None
 
             if insumo:
-                recetadetalle = Recetadetalle.objects.create(
-                    receta=receta,
-                    insumo=insumo,
-                    cantidad=cantidad,
-                    tipo_medida=jd["tipo_medida"],
-                    )
+                recetadetalle = Recetadetalle.objects.create(receta=receta, insumo=insumo, cantidad=cantidad, tipo_medida=jd["tipo_medida"])
                 datos = {"message": "success"}
                 return JsonResponse(datos, status=200)
             else:
@@ -152,11 +146,11 @@ class RecetadetalleView(View):
 
 
 
-    def patch(self, request, detalle_id):
+    def patch(self, request, receta, insumo):
         jd = json.loads(request.body)
 
         try:
-            receta_detalle = Recetadetalle.objects.get(id=detalle_id)
+            receta_detalle = Recetadetalle.objects.get(receta=receta, insumo=insumo)
         except Recetadetalle.DoesNotExist:
             datos = {'message': 'El detalle de receta no existe'}
             return JsonResponse(datos, status=404)

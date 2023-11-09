@@ -194,7 +194,7 @@ class PuntoReposicion(models.Model):
 
 
 class Receta(models.Model):
-    idreceta = models.IntegerField(db_column='idReceta', primary_key=True)  # Field name made lowercase.
+    idreceta = models.AutoField(db_column='idReceta', primary_key=True)  # Field name made lowercase.
     nombre_receta = models.CharField(max_length=50, unique=True)
     tipo = models.CharField(max_length=50)
 
@@ -204,7 +204,8 @@ class Receta(models.Model):
 
 
 class Recetadetalle(models.Model):
-    receta = models.OneToOneField(Receta, models.DO_NOTHING, db_column='receta', primary_key=True)  # The composite primary key (receta, insumo) found, that is not supported. The first column is selected.
+    idrecetadetalle = models.AutoField(db_column='idRecetaDetalle', primary_key=True)
+    receta = models.ForeignKey(Receta, models.DO_NOTHING, db_column='receta', to_field='nombre_receta')  # The composite primary key (receta, insumo) found, that is not supported. The first column is selected.
     insumo = models.ForeignKey(Insumo, models.DO_NOTHING, db_column='insumo', to_field='nombre_insumo')
     cantidad = models.IntegerField()
     tipo_medida = models.CharField(max_length=10, blank=True, null=True)
