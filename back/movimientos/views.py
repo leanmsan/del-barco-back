@@ -173,6 +173,17 @@ class SalidaView(View):
         pass
 
 
+@method_decorator(csrf_exempt, name="dispatch")
+class GetLastIdSalidaView(View):
+    #get para obtener el ultimo id
+    def get(self, request):
+        salida = Salida.objects.latest('id')
+        lastId = salida.idsalida
+        lastIdSalida = {"message": "exito", "lastid": lastId}
+        return JsonResponse(lastIdSalida)
+
+
+
 # VISTA DE SALIDA DETALLE
 
 
