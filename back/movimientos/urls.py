@@ -8,8 +8,8 @@ urlpatterns = [
     path('entradas/<int:id>/', EntradaView.as_view(), name="entradas_process"),
     path('entradasxprov/<int:prov>/', EntradaView.as_view(), name="entradasxprov"),
 
-    path('lastidEntrada/', GetLastIdEntradaView.as_view(), name="getlastid"),
-    path('lastidSalida/', GetLastIdSalidaView.as_view(), name="getlastid"),
+    path('lastidentrada/', GetLastIdEntradaView.as_view(), name="getlastid"),
+    path('lastidsalida/', GetLastIdSalidaView.as_view(), name="getlastid"),
 
     path('entrada_detalles/', EntradadetalleView.as_view(), name="entradadetalles_list"),
     path('entrada_detalles/<int:id>/', EntradadetalleView.as_view(), name="entradadetalles_process"),
