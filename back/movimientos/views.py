@@ -219,10 +219,10 @@ class SalidadetalleView(View):
                 if insumo.cantidad_disponible >= cantidad:
                     salida = Salidadetalle.objects.create(
                         idsalida=idsalida,
-                        insumo=insumo_id,
+                        insumo=insumo,
                         cantidad=cantidad
                     )
-                    insumo.cantidad_disponible -= cantidad;
+                    insumo.cantidad_disponible -= cantidad
                     insumo.save
                     datos = {"message": "success"}
                     return JsonResponse(datos, status=200)
