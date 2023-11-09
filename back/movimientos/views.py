@@ -177,7 +177,7 @@ class SalidaView(View):
 class GetLastIdSalidaView(View):
     #get para obtener el ultimo id
     def get(self, request):
-        salida = Salida.objects.latest('id')
+        salida = Salida.objects.latest('idsalida')
         lastId = salida.idsalida
         lastIdSalida = {"message": "exito", "lastid": lastId}
         return JsonResponse(lastIdSalida)
