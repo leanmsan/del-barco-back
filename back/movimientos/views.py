@@ -216,6 +216,7 @@ class SalidadetalleView(View):
         idsalida_id = jd["idsalida_id"]
         insumo_id = jd["insumo_id"]
         cantidad = jd["cantidad"]
+        cantidad = int(cantidad)
         try:
             idsalida = Salida.objects.get(idsalida=int(idsalida_id))
         except Salida.DoesNotExist:
