@@ -42,6 +42,7 @@ class CoccionView(View):
         receta_id = jd['receta_id']
         insuficientes = list()
         fecha = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        listainsumos = list()
         try:
             receta = Receta.objects.get(nombre_receta=receta_id)
         except Receta.DoesNotExist:
@@ -50,14 +51,18 @@ class CoccionView(View):
         if receta:
             recetadetalle = list(Recetadetalle.objects.filter(receta=receta_id))
             for detalle in recetadetalle:
-                listainsumos = list(Insumo.objects.filter(nombre_insumo=detalle.insumo))
+                listainsumos = Insumo.objects.filter(nombre_insumo=detalle.insumo)
                 for insumo in listainsumos:
                     if detalle.cantidad > insumo.cantidad_disponible:
                         insuficientes.append(insumo.nombre)
+
             if insuficientes:
-                datos = {'message': f'No hay suficiente stock de {", ".join(insuficientes)}'}
-                return JsonResponse(datos, status=404)
+                return JsonResponse({'message': f'No hay suficiente stock de {", ".join(insuficientes)}'})
             else:
+                for insumo in listainsumos:
+                    print(f'Restando {detalle.cantidad} a {insumo.nombre}')
+                    insumo.cantidad_disponible -= detalle.cantidad
+                    insumo.save()
                 coccion = Coccion.objects.create(receta=receta, volumen_producido=jd['volumen_producido'], fecha_coccion=fecha)
                 datos = {'message': 'Coccion creada correctamente'}
                 return JsonResponse(datos, status=200)
