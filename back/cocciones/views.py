@@ -43,7 +43,8 @@ class CoccionView(View):
         insuficientes = list()
         fecha = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
         listainsumos = list()
-        cantdis = list()
+        existencia = list()
+        insumosexistentes = list()
         try:
             receta = Receta.objects.get(nombre_receta=receta_id)
             print(f'Esto es receta {receta}')
@@ -53,21 +54,26 @@ class CoccionView(View):
         if receta:
             recetadetalle = Recetadetalle.objects.filter(receta=receta_id)
             for detalle in recetadetalle:
+                insumosexistentes.append(Insumo.objects.filter(nombre_insumo = detalle.insumo))
+            ###insumosexistentes.append(Insumo.objects.filter(nombre_insumo = recetadetalle.get(insumo)))
+
+            for detalle in recetadetalle:
                 listainsumos.append(detalle.insumo)
+                ###insumosexistentes.append(Insumo.objects.filter(nombre_insumo = detalle.insumo))
                 print(f'esto es lista insumo {listainsumos}')
-                insumo_disponible = Insumo.objects.filter(nombre_insumo = detalle.insumo)
-                print(f'esto es insumo disponible {insumo_disponible}')
-                #cantdis.append()
-                print(f'Esto es cantidad disponible {cantdis}')
-                for insumo in listainsumos:
-                    if detalle.cantidad > Insumo.objects.get(detalle.cantidad_disponible):
+                print(f'esto es existentes {insumosexistentes}')
+            for cantidad in insumosexistentes:
+                existencia.append(cantidad)
+                print(f'esto es existencia {existencia}')
+
+                for exist in existencia:
+                    if detalle.cantidad > exist:
                         insuficientes.append(insumo.nombre_insumo)
 
             if insuficientes:
                 return JsonResponse({'message': f'No hay suficiente stock de {", ".join(insuficientes)}'})
             else:
                 for insumo in listainsumos:
-                    print(f'Restando {detalle.cantidad} a {insumo.nombre}')
                     insumo.cantidad_disponible -= detalle.cantidad
                     insumo.save()
                 coccion = Coccion.objects.create(receta=receta, volumen_producido=jd['volumen_producido'], fecha_coccion=fecha)
@@ -76,3 +82,4 @@ class CoccionView(View):
         else:
             datos = {'message': 'La receta no existe'}
             return JsonResponse(datos, status=400)
+ 
