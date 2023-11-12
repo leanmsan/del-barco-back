@@ -86,6 +86,15 @@ class RecetaView(View):
         receta.save()
         datos = {'message': 'Receta actualizada'}
         return JsonResponse(datos, status=200)
+    
+@method_decorator(csrf_exempt, name="dispatch")
+class GetLastIdRecetaView(View):
+    #get para obtener el ultimo id
+    def get(self, request):
+        receta = Receta.objects.latest('idreceta')
+        lastId = receta.idreceta
+        lastIdReceta = {"message": "exito", "lastid": lastId}
+        return JsonResponse(lastIdReceta)
 
 # VISTA DE RECETA DETALLE
 
