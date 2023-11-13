@@ -38,29 +38,33 @@ class CoccionView(View):
                 return JsonResponse(datos, status=404)
 
     def post(self, request):
-        jd=json.loads(request.body)
-        receta_id=jd["receta_id"]
-        insuficientes=[]
+        jd = json.loads(request.body)
+        receta_id = jd["receta_id"]
+        insuficientes = list()
+
         try:
-            receta = Receta.objects.filter(nombre_receta=receta_id)
+            receta = Receta.objects.get(nombre_receta=receta_id)
         except Receta.DoesNotExist:
             receta = None
-        
+
         if receta:
-            listadetalles = Recetadetalle.objects.filter(receta=receta_id)
-            for detalle in listadetalles:
-                insumo = Insumo.objects.filter(nombre_insumo=detalle.insumo).get()
-                stock = insumo.cantidad_disponible
+            detalles = Recetadetalle.objects.filter(receta=receta.nombre_receta)
+            for detalle in detalles:
                 gasto = detalle.cantidad
-                if gasto > stock:
-                    insuficientes.append(insumo.nombre_insumo)
+                print('esto es gasto', gasto)
+                insumo = Insumo.objects.filter(nombre_insumo=detalle.insumo.nombre_insumo).get()
+                stock = insumo.cantidad_disponible
+                print('esto es stock', stock)
+                if gasto>stock:
+                    nombre=str(detalle.insumo.nombre_insumo)
+                    insuficientes.append(nombre)
             if insuficientes:
-                datos = f'No hay suficiente stock de {", ".join(insuficientes)}'
-                return JsonResponse({'message': datos}, status=400)
+                mensaje = f'No hay suficiente stock de {", ".join(insuficientes)}'
+                return JsonResponse({'message': mensaje}, status=400)
             else:
-                coccion = Coccion.objects.create(receta=receta_id,volumen_producido=jd["volumen_producido"],fecha=jd["fecha"])
+                coccion = Coccion.objects.create(receta=receta, volumen_producido=jd["volumen_producido"], fecha_coccion=jd["fecha_coccion"])
                 datos = {"message": "success"}
                 return JsonResponse(datos, status=200)
         else:
-            datos = 'No se encontró la receta'
+            datos = {'message': 'No se encontró la receta'}
             return JsonResponse(datos, status=400)

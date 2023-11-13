@@ -164,6 +164,7 @@ class Insumo(models.Model):
     categoria = models.CharField(max_length=20, blank=True, null=True)
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     proveedor = models.ForeignKey('Proveedor', models.DO_NOTHING, db_column='proveedor', to_field='nombre_proveedor', blank=True, null=True)
+    estado = models.CharField(max_length=1, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -209,7 +210,7 @@ class Recetadetalle(models.Model):
     insumo = models.ForeignKey(Insumo, models.DO_NOTHING, db_column='insumo', to_field='nombre_insumo')
     cantidad = models.IntegerField()
     tipo_medida = models.CharField(max_length=10, blank=True, null=True)
-
+    
     class Meta:
         managed = False
         db_table = 'recetadetalle'

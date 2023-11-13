@@ -39,9 +39,13 @@ class ProveedorView(View):
             datos = {'message': 'Proveedor ya existente'}
             return JsonResponse(datos, status=400)
         else:
-            Proveedor.objects.create(nombre_proveedor= jd['nombre_proveedor'], mail = jd['mail'], telefono = jd['telefono'], estado = 'A')
-            datos = {'message': 'success'}
-        return JsonResponse(datos, status=201)
+            if len(nombre_proveedor) < 3:
+                datos = {'message': 'Nombre inválido'}
+                return JsonResponse(datos, status=400)
+            else:
+                Proveedor.objects.create(nombre_proveedor= jd['nombre_proveedor'], mail = jd['mail'], telefono = jd['telefono'], estado = 'A')
+                datos = {'message': 'success'}
+                return JsonResponse(datos, status=201)
 
     def patch(self,request,id):
         jd = json.loads(request.body)
