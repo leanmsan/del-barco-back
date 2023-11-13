@@ -69,19 +69,21 @@ class RecetaView(View):
         jd = json.loads(request.body)
         nombre_receta = jd.get('nombre_receta', None)
 
-        if nombre_receta:
-            recetas_mismo_nombre_receta = Insumo.objects.filter(nombre_receta=nombre_receta).exclude(idreceta=id)
-            if recetas_mismo_nombre_receta.exists():
-                datos = {'message': 'El nombre ya está en uso en otra receta. No se puede actualizar.'}
-                return JsonResponse(datos, status=400)
         try:
             receta = Receta.objects.get(idreceta=id)
         except Receta.DoesNotExist:
             datos = {'message': 'No se encontró la receta'}
-            return JsonResponse(datos, status=404)
+            return JsonResponse(datos, status=400)
 
+        if nombre_receta:
+            recetas_mismo_nombre_receta = Receta.objects.filter(nombre_receta=nombre_receta)
+            if recetas_mismo_nombre_receta.exists():
+                datos = {'message': 'El nombre ya está en uso en otra receta. No se puede actualizar.'}
+                return JsonResponse(datos, status=400)
+            else:
+                receta.nombre_receta=nombre_receta
         for field_name, field_value in jd.items():
-            if hasattr(receta, field_name):
+            if field_name != 'proveedor_id' and hasattr(receta, field_name):
                 setattr(receta, field_name, field_value)
         receta.save()
         datos = {'message': 'Receta actualizada'}
@@ -146,28 +148,24 @@ class RecetadetalleView(View):
 
 
 
-    def patch(self, request, receta, insumo):
+    def patch(self, request, id):
         jd = json.loads(request.body)
-
         try:
-            receta_detalle = Recetadetalle.objects.get(receta=receta, insumo=insumo)
+            recetadetalle = Recetadetalle.objects.get(idrecetadetalle=id)
         except Recetadetalle.DoesNotExist:
             datos = {'message': 'El detalle de receta no existe'}
             return JsonResponse(datos, status=404)
-
-        if 'idreceta' in jd:
-            idreceta = jd['idreceta']
-            try:
-                receta = Receta.objects.get(idreceta=idreceta)
-            except Receta.DoesNotExist:
-                datos = {'message': 'La receta especificada no existe'}
-                return JsonResponse(datos, status=404)
-
+        insumo = jd.get('insumo', None)
+        if insumo:
+            if Insumo.objects.filter(nombre_insumo=insumo).none():
+                datos = {'message': 'El insumo no existe. No se puede actualizar.'}
+                return JsonResponse(datos, status=400)
+            else:
+                recetadetalle.insumo=jd["insumo_id"]
         for field_name, field_value in jd.items():
-                if hasattr(receta_detalle, field_name):
-                    setattr(receta_detalle, field_name, field_value)
-
-        receta_detalle.save()
-
-        datos = {'message': 'Detalle de receta actualizado correctamente'}
-        return JsonResponse(datos)
+            if field_name != 'insumo_id' and hasattr(recetadetalle, field_name):
+                setattr(recetadetalle, field_name, field_value)
+        recetadetalle.save()
+        datos = {'message': 'Receta actualizada'}
+        return JsonResponse(datos, status=200)
+        
