@@ -24,5 +24,6 @@ urlpatterns = [
     path('api/', include('movimientos.urls'),name='movimientos'),
     path('api/', include('recetas.urls'), name='recetas'),
     path('api/', include('cocciones.urls'), name='cocciones'),
+    path('api/', include('authtentication.urls'), name='authtentication'),
     ]
 
