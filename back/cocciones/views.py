@@ -118,25 +118,20 @@ class InformeCoccionesView(View):
         cocciones = Coccion.objects.values('receta').annotate(cantidad=Count('receta'))
         listacocciones = list(cocciones)
         for coccion in listacocciones:
-            recetas.append(coccion['receta'])
+            recetas.append(f'{coccion["receta"]}: {coccion["cantidad"]}')
             long = len(listacocciones)
             porcentaje = (coccion['cantidad'] * 100)/long
             cantidades.append(porcentaje)
         d = Drawing(200, 100)
         pc = Pie()
-        pc.width = 100
-        pc.height = 100
+        pc.width = 200
+        pc.height = 200
         pc.data = cantidades
         pc.labels = recetas
         pc.sideLabels=1
         pc.slices.strokeWidth=0.5
-        pc.slices[3].popout = 10
-        pc.slices[3].strokeWidth = 2
-        pc.slices[3].strokeDashArray = [2,2]
-        pc.slices[3].labelRadius = 1.75
-        pc.slices[3].fontColor = colors.red
         d.add(pc)
-        d.drawOn(p, inch, 6.75*inch)
+        d.drawOn(p, inch, 5*inch)
         p.showPage()
         
         p.save()

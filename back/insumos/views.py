@@ -155,10 +155,10 @@ class InformeInsumosView(View):
                            ('BACKGROUND', (0, 1), (-1, -1), '#f0f0f0')])
         tabla.setStyle(estilo_tabla)
         tabla.wrapOn(p, 0, 0)
-        tabla.drawOn(p, 0*inch, 7*inch)
+        tabla.drawOn(p, 0*inch, 5*inch)
         p.drawString(100, 150, "")
         p.setFont("Helvetica", 16)
-        p.drawString(-0.75*inch, 4 * inch, "Valoración Actual del Stock:")
+        p.drawString(-0.75*inch, 4 * inch, "Valoración actual del Stock:")
         p.drawString(-0.5*inch, 3.5 * inch, f"Total:   ${self.valoracion_stock()}")
 
         p.showPage()
