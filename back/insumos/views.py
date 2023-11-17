@@ -1,14 +1,20 @@
+import datetime
+import json
 from typing import Any
 from django import http
-from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from common.models import Insumo, Proveedor
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
-from django.utils.decorators import method_decorator
-import json
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.units import inch, cm, mm
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from django.http import HttpResponse
+from django.views import View
+from reportlab.lib.utils import ImageReader
 
 class InsumoView(View):
     
@@ -93,3 +99,69 @@ class InsumoView(View):
 
         datos = {'message': 'Insumo actualizado correctamente'}
         return JsonResponse(datos, status= 200)
+    
+    
+class InformeInsumosView(View):
+    
+    def valoracion_stock(self):
+        valoracion = 0
+        insumos = Insumo.objects.filter()
+        for insumo in insumos:
+            valoracion += (insumo.cantidad_disponible * insumo.precio_unitario)
+        return valoracion
+    
+    
+    def filtroInsumos(self, categoria=None):
+        if categoria:
+            insumos = Insumo.objects.filter(categoria=categoria).values_list('nombre_insumo', 'cantidad_disponible', 'tipo_medida','precio_unitario', 'proveedor', 'categoria')
+        else:
+           insumos = Insumo.objects.filter().values_list('nombre_insumo', 'cantidad_disponible', 'tipo_medida','precio_unitario', 'proveedor', 'categoria') 
+        lista = list(insumos)
+        lista.insert(0,['Nombre', 'Stock', 'Medida','Precio', 'Proveedor', 'Categoria'])
+        
+        return lista
+    
+    # Informe
+    def get(self, request):
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="informe_insumos.pdf"'
+        fecha = datetime.date.today()
+        fecha = fecha.strftime("%d/%m/%Y")
+        p = canvas.Canvas(response, pagesize=A4)
+        p.translate(inch, inch)
+        
+        # CABECERA
+        p.setStrokeColorRGB(0,0,0)
+        p.setLineWidth(1)
+        p.line(-1*inch,9*inch,8*inch,9*inch)
+        p.setFillColorRGB(0, 0, 0)
+        p.setFont('Helvetica-Bold', 20)
+        p.drawString(1.5*inch, 9.25 * inch, 'Informe Insumos:')
+        p.setFont('Helvetica', 12)
+        p.drawString(5*inch, 10.25 * inch, f'{fecha}')
+        p.drawString(-0.75*inch,10.25*inch, "Fábrica de Cervezas Del Barco")
+
+        
+        # CUERPO
+        p.drawString(-0.75*inch, 8.5 * inch, 'Tabla: ')
+        data = self.filtroInsumos()
+        tabla = Table(data)
+
+        estilo_tabla = TableStyle([('BACKGROUND', (0, 0), (-1, 0), '#1f77b4'),
+                           ('TEXTCOLOR', (0, 0), (-1, 0), 'white'),
+                           ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                           ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                           ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                           ('BACKGROUND', (0, 1), (-1, -1), '#f0f0f0')])
+        tabla.setStyle(estilo_tabla)
+        tabla.wrapOn(p, 0, 0)
+        tabla.drawOn(p, 0*inch, 7*inch)
+        p.drawString(100, 150, "")
+        p.setFont("Helvetica", 16)
+        p.drawString(-0.75*inch, 4 * inch, "Valoración Actual del Stock:")
+        p.drawString(-0.5*inch, 3.5 * inch, f"Total:   ${self.valoracion_stock()}")
+
+        p.showPage()
+        
+        p.save()
+        return response

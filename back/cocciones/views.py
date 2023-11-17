@@ -1,16 +1,28 @@
 
+import datetime
+from io import BytesIO
 from typing import Any
 from django import http
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from matplotlib import pyplot as plt
 from common.models import Coccion, Receta, Insumo, Recetadetalle
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 import json
-from django.db import transaction
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.units import inch, cm, mm
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from django.http import HttpResponse
+from django.views import View
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.piecharts import Pie
+from django.db.models import Count
 
 class CoccionView(View):
 
@@ -68,3 +80,65 @@ class CoccionView(View):
         else:
             datos = {'message': 'No se encontró la receta'}
             return JsonResponse(datos, status=400)
+        
+class InformeCoccionesView(View):
+    
+    def cantCocciones(self):
+        cocciones = list(Coccion.objects.filter())
+        cantidad = len(cocciones)
+        return cantidad
+    
+    # Informe
+    def get(self, request):
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="informe_cocciones.pdf"'
+        p = canvas.Canvas(response, pagesize=A4)
+        p.translate(inch, inch)
+
+        # CABECERA
+        p.setStrokeColorRGB(0,0,0)
+        p.setLineWidth(1)
+        p.line(-1*inch,9*inch,8*inch,9*inch)
+        p.setFillColorRGB(0, 0, 0)
+        p.setFont('Helvetica-Bold', 20)
+        p.drawString(1.5*inch, 9.25 * inch, 'Informe Cocciones:')
+        p.setFont('Helvetica', 12)
+        p.drawString(5*inch, 10.25 * inch, f'{datetime.date.today()}')
+        p.drawString(-0.75*inch,10.25*inch, "Fábrica de Cervezas Del Barco")
+
+        #CUERPO
+        p.setFont('Helvetica-Bold', 14)
+        p.drawString(-0.75*inch, 8.5 * inch, f'Cantidad de Cocciones: {self.cantCocciones()}')
+        p.setFont('Helvetica', 12)
+        p.drawString(-0.75*inch, 1 * inch, 'Este es un párrafo al final del informe.')
+
+        # GRAFICO
+        recetas = []
+        cantidades = []
+        cocciones = Coccion.objects.values('receta').annotate(cantidad=Count('receta'))
+        listacocciones = list(cocciones)
+        for coccion in listacocciones:
+            recetas.append(coccion['receta'])
+            long = len(listacocciones)
+            porcentaje = (coccion['cantidad'] * 100)/long
+            cantidades.append(porcentaje)
+        d = Drawing(200, 100)
+        pc = Pie()
+        pc.width = 100
+        pc.height = 100
+        pc.data = cantidades
+        pc.labels = recetas
+        pc.sideLabels=1
+        pc.slices.strokeWidth=0.5
+        pc.slices[3].popout = 10
+        pc.slices[3].strokeWidth = 2
+        pc.slices[3].strokeDashArray = [2,2]
+        pc.slices[3].labelRadius = 1.75
+        pc.slices[3].fontColor = colors.red
+        d.add(pc)
+        d.drawOn(p, inch, 6.75*inch)
+        p.showPage()
+        
+        p.save()
+        
+        return response
