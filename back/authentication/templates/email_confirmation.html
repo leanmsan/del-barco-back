@@ -1,0 +1,69 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Verificación de Correo Electrónico</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap");
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: #fff;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .verification-code {
+        font-size: 24px;
+        color: #fcb404;
+        font-weight: bold;
+      }
+
+      h1 {
+        color: #fcb404;
+        font-weight: bold;
+      }
+
+      p {
+        color: #333;
+      }
+
+      a {
+        color: #fcb404;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img src="{% static 'Logo1.png' %}" alt="Logo de la Empresa" />
+      <h1>Verificación de Correo Electrónico</h1>
+      <p>
+        Hola {{ user.get_full_name }}. Has recibido este correo electrónico
+        para verificar tu dirección de correo. Utiliza el siguiente código de
+        verificación:
+      </p>
+      <p class="verification-code">
+        {{ verification_code }}
+      </p>
+      <p>
+        Si no has solicitado esta verificación, puedes ignorar este mensaje.
+      </p>
+    </div>
+  </body>
+</html>

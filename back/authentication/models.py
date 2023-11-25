@@ -4,8 +4,6 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.tokens import RefreshToken
 from .manager import UserManager
 
-# Create your models here.
-
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True, verbose_name=_("Email Address"))
     first_name = models.CharField(max_length=100, verbose_name=_("First Name"))
@@ -40,7 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class OneTimePassword(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    code = models.CharField(max_length=6, unique=True)
+    code = models.CharField(max_length=8, unique=True)
 
     def __str__(self):
         return f'{self.user.first_name} passcode'

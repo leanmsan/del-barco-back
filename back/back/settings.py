@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import environ
+import os
 
 env = environ.Env(
     DEBUG = (bool, False)
@@ -49,7 +50,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     'rest_auth',
-    'authtentication',
+    'authentication',
     'common',
     'insumos',
     'proveedores',
@@ -91,7 +92,7 @@ ROOT_URLCONF = 'back.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'back', 'authentication', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -103,6 +104,12 @@ TEMPLATES = [
         },
     },
 ]
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'authentication', 'static'),
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 WSGI_APPLICATION = 'back.wsgi.application'
 
@@ -121,7 +128,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "authtentication.User"
+AUTH_USER_MODEL = "authentication.User"
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',

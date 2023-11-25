@@ -6,7 +6,9 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
-from .utils import send_normal_email
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.utils.encoding import smart_str, smart_bytes, force_str
 from rest_framework_simplejwt.tokens import Token, TokenError, RefreshToken
 
@@ -73,6 +75,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         email = attrs.get('email')
+
         if User.objects.filter(email=email).exists():
             user = User.objects.get(email=email)
             uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
@@ -81,14 +84,24 @@ class PasswordResetRequestSerializer(serializers.Serializer):
             site_domain = get_current_site(request).domain
             frontend_url = 'http://localhost:5173/password-reset-confirm/{uidb64}/{token}'
             abslink = frontend_url.format(uidb64=uidb64, token=token)
-            email_body = f'Hola! Usa el siguiente enlace para cambiar tu contraseña {abslink}'
+
+            # Renderizar el cuerpo del correo electrónico como HTML
+            email_body_html = render_to_string('password_reset_email_template.html', {'abslink': abslink, 'user': user})
+            
+            # Obtener el cuerpo del correo electrónico sin formato HTML para enviar en el formato alternativo
+            email_body_text = strip_tags(email_body_html)
+
             data = {
-                'email_body': email_body,
-                'email_subject': "Recuperar contraseña",
-                'to_email': user.email
+                'subject': "Recuperar contraseña",
+                'message': email_body_text,  # Usar el cuerpo sin formato HTML como texto
+                'from_email': 'your_email@example.com',  # Reemplaza con tu dirección de correo
+                'recipient_list': [user.email],
+                'html_message': email_body_html,  # Agregar el cuerpo HTML al mensaje
             }
 
-            send_normal_email(data)
+            send_mail(**data, fail_silently=False)
+        else:
+            raise serializers.ValidationError("No se encontró un usuario con esta dirección de correo electrónico.")
 
         return super().validate(attrs)
     
