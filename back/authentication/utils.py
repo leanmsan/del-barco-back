@@ -13,7 +13,7 @@ def generateAlphanumericOtp():
 def send_code_to_user(email):
     subject = "Verificación de correo"
     opt_code = generateAlphanumericOtp()
-    print(opt_code)
+    #print(opt_code)
     user = User.objects.get(email=email)
 
     # Renderizar el cuerpo del correo electrónico como HTML
