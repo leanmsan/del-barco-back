@@ -15,7 +15,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 class RegisterUserView(GenericAPIView):
     serializer_class=UserRegisterSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def post(self, request):
         user_data = request.data
@@ -35,7 +35,7 @@ class RegisterUserView(GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class UserDetailsAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
