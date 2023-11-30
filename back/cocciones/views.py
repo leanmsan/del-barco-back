@@ -24,9 +24,10 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.piecharts import Pie
 from django.db.models import Count
 
+
 class CoccionView(View):
 
-    @method_decorator(csrf_exempt)
+    @method_decorator(csrf_exempt, name='dispatch')
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
