@@ -1,19 +1,21 @@
 from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
-from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetRequestSerializer, SetNewPasswordSerializer, LogoutSerializer
+from .serializers import UserRegisterSerializer, UserSerializer, LoginSerializer, PasswordResetRequestSerializer, SetNewPasswordSerializer, LogoutSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .utils import send_code_to_user
 from .models import User, OneTimePassword
 from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
+from django.utils.encoding import smart_str
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
-# Create your views here.
 
 class RegisterUserView(GenericAPIView):
     serializer_class=UserRegisterSerializer
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         user_data = request.data
@@ -32,6 +34,27 @@ class RegisterUserView(GenericAPIView):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class UserDetailsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UserDeleteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+
+        # Verificar si el usuario existe antes de intentar eliminar
+        if user:
+            user.delete()
+            return Response({'message': 'Usuario eliminado correctamente'}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'message': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 class VerifyUserEmail(GenericAPIView):
     def post(self, request):
         otpcode = request.data.get('otp')
