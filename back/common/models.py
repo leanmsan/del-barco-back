@@ -5,7 +5,6 @@ class Coccion(models.Model):
     idcoccion = models.AutoField(db_column='idCoccion', primary_key=True)  # Field name made lowercase.
     fecha_coccion = models.CharField(max_length=50, blank=True, null=True)
     receta = models.ForeignKey('Receta', models.DO_NOTHING, db_column='receta', to_field='nombre_receta')
-    volumen_producido = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         managed = False
@@ -77,7 +76,8 @@ class Receta(models.Model):
     idreceta = models.AutoField(db_column='idReceta', primary_key=True)  # Field name made lowercase.
     nombre_receta = models.CharField(max_length=50, unique=True)
     tipo = models.CharField(max_length=50)
-
+    litros = models.DecimalField(max_digits=10, decimal_places=2)
+    
     class Meta:
         managed = False
         db_table = 'receta'
