@@ -105,13 +105,6 @@ TEMPLATES = [
     },
 ]
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'authentication', 'static'),
-]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-WSGI_APPLICATION = 'back.wsgi.application'
 
 
 # Database
@@ -168,7 +161,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static'
+]
+
+WSGI_APPLICATION = 'back.wsgi.application'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -177,11 +175,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
 
-EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL='gestiondelbarco@gmail.com'
-EMAIL_PORT = '2525'
-EMAIL_USE_TLS=True
+#Gmail SMTP (solo en produccion)
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS=True
+# EMAIL_HOST_USER = 'gestiondelbarco@gmail.com'
+# EMAIL_HOST_PASSWORD = 'karh tnnd smyo cphl'
+
+#Mailtrap SMTP (solo en dev)
+# EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+# EMAIL_HOST_USER = '6e56e6d9ebed7d'
+# EMAIL_HOST_PASSWORD = '664993ddbda9a7'
+# DEFAULT_FROM_EMAIL='gestiondelbarco@gmail.com'
+# EMAIL_PORT = '2525'
+# EMAIL_USE_TLS=True
+
+# Configuración de correo para MailHog en entorno de desarrollo
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = '127.0.0.1'
+EMAIL_PORT = 1025
+DEFAULT_FROM_EMAIL = 'noreply@example.com'
 
 FRONTEND_URL = 'http://localhost:5173/' 
