@@ -1,4 +1,3 @@
-
 from typing import Any
 from django import http
 from django.shortcuts import render, redirect
@@ -8,6 +7,7 @@ from common.models import Proveedor
 from django.views import View
 from django.http.response import JsonResponse, HttpResponse
 import json
+from authentication.decorators import authentication_required
 
 class ProveedorView(View):
 
@@ -15,6 +15,7 @@ class ProveedorView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
+    @authentication_required
     def get(self,request,id=0):
         if id > 0:
             proveedores = list(Proveedor.objects.filter(idproveedor=id).values())
@@ -32,6 +33,7 @@ class ProveedorView(View):
                 datos = {'message': 'no se encuentran proveedores'}
             return JsonResponse(datos)
 
+    @authentication_required
     def post(self,request):
         jd = json.loads(request.body)
         nombre_proveedor= jd['nombre_proveedor']
@@ -47,6 +49,7 @@ class ProveedorView(View):
                 datos = {'message': 'success'}
                 return JsonResponse(datos, status=201)
 
+    @authentication_required
     def patch(self,request,id):
         jd = json.loads(request.body)
         nombre_proveedor = jd.get('nombre_proveedor', None)

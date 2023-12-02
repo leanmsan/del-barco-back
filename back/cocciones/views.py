@@ -1,4 +1,3 @@
-
 import datetime
 from io import BytesIO
 from typing import Any
@@ -23,6 +22,7 @@ from django.views import View
 from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.piecharts import Pie
 from django.db.models import Count
+from authentication.decorators import authentication_required
 
 
 class CoccionView(View):
@@ -31,6 +31,7 @@ class CoccionView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
+    @authentication_required
     def get(self, request, receta=0):
         if receta > 0:
             cocciones = list(Coccion.objects.filter(receta=receta).values())
@@ -50,6 +51,7 @@ class CoccionView(View):
                 datos = {'message': 'No se encontraron cocciones'}
                 return JsonResponse(datos, status=404)
 
+    @authentication_required
     def post(self, request):
         jd = json.loads(request.body)
         receta_id = jd["receta_id"]
@@ -84,12 +86,14 @@ class CoccionView(View):
         
 class InformeCoccionesView(View):
     
+    @authentication_required
     def cantCocciones(self):
         cocciones = list(Coccion.objects.filter())
         cantidad = len(cocciones)
         return cantidad
     
     # Informe
+    @authentication_required
     def get(self, request):
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="informe_cocciones.pdf"'

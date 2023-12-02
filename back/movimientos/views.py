@@ -1,23 +1,18 @@
 from django.shortcuts import render
-from common.models import (
-    Entrada,
-    Entradadetalle,
-    Salida,
-    Salidadetalle,
-    Proveedor,
-    Insumo,
-)
-
+from common.models import Entrada, Entradadetalle, Salida, Salidadetalle, Proveedor, Insumo
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 import json
+from authentication.decorators import authentication_required
 
 # VISTA DE ENTRADA
 
 @method_decorator(csrf_exempt, name="dispatch")
 class EntradaView(View):
+
+    @authentication_required
     def get(self, request, id=0, prov=None):
         if id > 0:
             entradas = list(Entrada.objects.filter(identrada=id).values())
@@ -35,6 +30,7 @@ class EntradaView(View):
                 datos = {"message": "No se encontraron movimientos de entrada"}
         return JsonResponse(datos)
 
+    @authentication_required
     def post(self, request):
         jd = json.loads(request.body)
         proveedor_id = jd["proveedor_id"]
@@ -60,7 +56,9 @@ class EntradaView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class GetLastIdEntradaView(View):
+
     #get para obtener el ultimo id
+    @authentication_required
     def get(self, request):
         entrada = Entrada.objects.latest('identrada')
         lastId = entrada.identrada
@@ -71,6 +69,8 @@ class GetLastIdEntradaView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class EntradadetalleView(View):
+
+    @authentication_required
     def get(self, request, id=0):
         if id > 0:
             entradasdet = list(Entradadetalle.objects.filter(identrada=id).values())
@@ -93,6 +93,7 @@ class EntradadetalleView(View):
                 datos = {"message": "No se encontraron detalles de entrada"}
                 return JsonResponse(datos, status=404)
 
+    @authentication_required
     def post(self, request):
         jd = json.loads(request.body)
         identrada_id = jd["identrada_id"]
@@ -134,6 +135,8 @@ class EntradadetalleView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SalidaView(View):
+
+    @authentication_required
     def get(self, request, id=0):
         if id > 0:
             salidas = list(Salida.objects.filter(idsalida=id).values())
@@ -157,6 +160,7 @@ class SalidaView(View):
                 datos = {"message": "No se encontraron movimientos de salida"}
                 return JsonResponse(datos, status=400)
 
+    @authentication_required
     def post(self, request):
         jd = json.loads(request.body)
         salida = Salida.objects.create(fecha_salida=jd["fecha_salida"], descripcion=jd.get("descripcion", None))
@@ -171,7 +175,9 @@ class SalidaView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class GetLastIdSalidaView(View):
+
     #get para obtener el ultimo id
+    @authentication_required
     def get(self, request):
         salida = Salida.objects.latest('idsalida')
         lastId = salida.idsalida
@@ -184,6 +190,8 @@ class GetLastIdSalidaView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SalidadetalleView(View):
+
+    @authentication_required
     def get(self, request, id=0):
         if id > 0:
             salidasdet = list(Salidadetalle.objects.filter(idsalida=id).values())
@@ -206,6 +214,7 @@ class SalidadetalleView(View):
                 datos = {"message": "No se encontraron detalles de salida"}
                 return JsonResponse(datos, status=404)
 
+    @authentication_required
     def post(self, request):
         jd = json.loads(request.body)
         idsalida_id = jd["idsalida_id"]

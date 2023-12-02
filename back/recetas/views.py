@@ -1,16 +1,12 @@
 from django.shortcuts import render
-from common.models import (
-    Receta,
-    Recetadetalle,
-    Insumo,
-)
-
+from common.models import Receta, Recetadetalle, Insumo
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 import json
 from datetime import datetime
+from authentication.decorators import authentication_required
 
 # VISTA DE RECETA
 
@@ -21,6 +17,7 @@ class RecetaView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
     
+    @authentication_required
     def get(self, request, id=0):
         if id > 0:
             recetas = list(Receta.objects.filter(idreceta=id).values())
@@ -44,6 +41,7 @@ class RecetaView(View):
                 datos = {"message": "No se encontraron recetas"}
                 return JsonResponse(datos, status=400)
     
+    @authentication_required
     def post(self, request):
         jd = json.loads(request.body)
         nombre_receta = jd["nombre_receta"]
@@ -65,6 +63,7 @@ class RecetaView(View):
             }
             return JsonResponse(datos, status=200)
 
+    @authentication_required
     def patch(self, request, id):
         jd = json.loads(request.body)
         nombre_receta = jd.get('nombre_receta', None)
@@ -91,7 +90,9 @@ class RecetaView(View):
     
 @method_decorator(csrf_exempt, name="dispatch")
 class GetLastIdRecetaView(View):
+
     #get para obtener el ultimo id
+    @authentication_required
     def get(self, request):
         receta = Receta.objects.latest('idreceta')
         lastId = receta.idreceta
@@ -103,6 +104,7 @@ class GetLastIdRecetaView(View):
 @method_decorator(csrf_exempt, name="dispatch")
 class RecetadetalleView(View):
 
+    @authentication_required
     def get(self, request, nombre_receta=0):
         if nombre_receta > 0:
             recetasdet = list(Recetadetalle.objects.filter(receta=nombre_receta).values())
@@ -125,7 +127,7 @@ class RecetadetalleView(View):
                 datos = {"message": "No se encontraron detalles de receta"}
                 return JsonResponse(datos, status=404)
 
-
+    @authentication_required
     def post(self, request):
         jd = json.loads(request.body)
         receta_id = jd["receta_id"]
@@ -155,8 +157,7 @@ class RecetadetalleView(View):
             datos = {"message": "La receta no existe"}
             return JsonResponse(datos, status=400)
 
-
-
+    @authentication_required
     def patch(self, request, id):
         jd = json.loads(request.body)
         try:

@@ -15,6 +15,8 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from django.http import HttpResponse
 from django.views import View
 from reportlab.lib.utils import ImageReader
+from authentication.decorators import authentication_required
+
 
 class InsumoView(View):
     
@@ -22,6 +24,7 @@ class InsumoView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
     
+    @authentication_required
     def get(self, request, id=0):
         if id > 0:
             insumos = list(Insumo.objects.filter(idinsumo=id).values())
@@ -41,6 +44,7 @@ class InsumoView(View):
                 datos = {'message': 'No se encontraron insumos'}
                 return JsonResponse(datos, status=404)
     
+    @authentication_required
     def post(self, request):
         jd = json.loads(request.body)
         nombre_insumo = jd['nombre_insumo']
@@ -64,7 +68,7 @@ class InsumoView(View):
             datos = {'message': 'El proveedor no existe'}
             return JsonResponse(datos, status=400)
 
-
+    @authentication_required
     def patch(self, request, id):
         jd = json.loads(request.body)
         
@@ -103,6 +107,7 @@ class InsumoView(View):
     
 class InformeInsumosView(View):
     
+    @authentication_required
     def valoracion_stock(self):
         valoracion = 0
         insumos = Insumo.objects.filter()
@@ -110,7 +115,7 @@ class InformeInsumosView(View):
             valoracion += (insumo.cantidad_disponible * insumo.precio_unitario)
         return valoracion
     
-    
+    @authentication_required
     def filtroInsumos(self, categoria=None):
         if categoria:
             insumos = Insumo.objects.filter(categoria=categoria).values_list('nombre_insumo', 'cantidad_disponible', 'tipo_medida','precio_unitario', 'proveedor', 'categoria')
@@ -122,6 +127,7 @@ class InformeInsumosView(View):
         return lista
     
     # Informe
+    @authentication_required
     def get(self, request):
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="informe_insumos.pdf"'
