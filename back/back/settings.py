@@ -16,7 +16,9 @@ import environ
 import os
 
 env = environ.Env(
-    DEBUG = (bool, False)
+    DEBUG=(bool, False),
+    PRODUCTION_EMAIL_PORT=(int, 587),
+    PRODUCTION_EMAIL_USE_TLS=(bool, True),
 )
 
 environ.Env.read_env()
@@ -177,18 +179,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
 
-#Gmail SMTP (solo en produccion)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env('PRODUCTION_EMAIL_HOST')
-EMAIL_PORT = env('PRODUCTION_EMAIL_PORT')
-EMAIL_USE_TLS=env('PRODUCTION_EMAIL_USE_TLS')
+
+# Configuración del servidor de correo electrónico para producción
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = env.int('PRODUCTION_EMAIL_PORT')
+EMAIL_USE_TLS = env.bool('PRODUCTION_EMAIL_USE_TLS')
 EMAIL_HOST_USER = env('PRODUCTION_EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('PRODUCTION_EMAIL_HOST_PASSWORD')
 
-# Configuración de correo para MailHog en entorno de desarrollo
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = env('DEV_EMAIL_HOST')
-# EMAIL_PORT = env('DEV_EMAIL_PORT')
-# DEFAULT_FROM_EMAIL = env('DEV_DEFAULT_FROM_EMAIL')
-
+# Configuración del servidor de correo electrónico para desarrollo
+# DEV_EMAIL_HOST = env('DEV_EMAIL_HOST')
+# DEV_EMAIL_PORT = env.int('DEV_EMAIL_PORT')
+# DEV_DEFAULT_FROM_EMAIL = env('DEV_DEFAULT_FROM_EMAIL')
 FRONTEND_URL = 'http://localhost:5173/' 
