@@ -19,6 +19,8 @@ env = environ.Env(
     DEBUG = (bool, False)
 )
 
+environ.Env.read_env()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -177,24 +179,16 @@ CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
 
 #Gmail SMTP (solo en produccion)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER = 'gestiondelbarco@gmail.com'
-EMAIL_HOST_PASSWORD = 'karh tnnd smyo cphl'
-
-#Mailtrap SMTP (solo en dev)
-# EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
-# EMAIL_HOST_USER = '6e56e6d9ebed7d'
-# EMAIL_HOST_PASSWORD = '664993ddbda9a7'
-# DEFAULT_FROM_EMAIL='gestiondelbarco@gmail.com'
-# EMAIL_PORT = '2525'
-# EMAIL_USE_TLS=True
+EMAIL_HOST = env('PRODUCTION_EMAIL_HOST')
+EMAIL_PORT = env('PRODUCTION_EMAIL_PORT')
+EMAIL_USE_TLS=env('PRODUCTION_EMAIL_USE_TLS')
+EMAIL_HOST_USER = env('PRODUCTION_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('PRODUCTION_EMAIL_HOST_PASSWORD')
 
 # Configuración de correo para MailHog en entorno de desarrollo
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = '127.0.0.1'
-# EMAIL_PORT = 1025
-# DEFAULT_FROM_EMAIL = 'noreply@example.com'
+# EMAIL_HOST = env('DEV_EMAIL_HOST')
+# EMAIL_PORT = env('DEV_EMAIL_PORT')
+# DEFAULT_FROM_EMAIL = env('DEV_DEFAULT_FROM_EMAIL')
 
 FRONTEND_URL = 'http://localhost:5173/' 
