@@ -117,7 +117,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
     token = serializers.CharField(write_only=True)
 
     class Meta:
-        fields= ['password', 'confirm_password', 'uidb64', 'token']
+        fields = ['password', 'confirm_password', 'uidb64', 'token']
 
     def validate(self, attrs):
         try:
@@ -133,14 +133,14 @@ class SetNewPasswordSerializer(serializers.Serializer):
                 raise AuthenticationFailed("Reset link is invalid or expired", 401)
 
             if password != confirm_password:
-                raise AuthenticationFailed("Password do not match")
+                raise serializers.ValidationError("Password do not match")
 
             user.set_password(password)
             user.save()
 
             return user
         except Exception as e:
-            return AuthenticationFailed("Link is invalid or has expired") 
+            raise serializers.ValidationError("Link is invalid or has expired")
         
 class LogoutSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
