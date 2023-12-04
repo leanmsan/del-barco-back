@@ -55,7 +55,8 @@ class RecetaView(View):
         else:      
             recetas = Receta.objects.create(
                 nombre_receta=nombre_receta,
-                tipo=jd["tipo"]
+                tipo=jd["tipo"],
+                litros=jd["litros"]
             )
             last_inserted_receta = recetas.nombre_receta
 
