@@ -75,7 +75,7 @@ class CoccionView(View):
                 mensaje = f'No hay suficiente stock de {", ".join(insuficientes)}'
                 return JsonResponse({'message': mensaje}, status=400)
             else:
-                coccion = Coccion.objects.create(receta=receta, volumen_producido=jd["volumen_producido"], fecha_coccion=jd["fecha_coccion"])
+                coccion = Coccion.objects.create(receta=receta, fecha_coccion=jd["fecha_coccion"])
                 datos = {"message": "success"}
                 return JsonResponse(datos, status=200)
         else:
