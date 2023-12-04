@@ -1,12 +1,7 @@
 
 import datetime
-from io import BytesIO
-from typing import Any
-from django import http
-from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from matplotlib import pyplot as plt
 from common.models import Coccion, Receta, Insumo, Recetadetalle
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -15,9 +10,7 @@ from django.utils.decorators import method_decorator
 import json
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from reportlab.lib import colors
-from reportlab.lib.units import inch, cm, mm
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib.units import inch
 from django.http import HttpResponse
 from django.views import View
 from reportlab.graphics.shapes import Drawing
