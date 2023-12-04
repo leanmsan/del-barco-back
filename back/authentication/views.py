@@ -11,6 +11,7 @@ from .models import User, OneTimePassword
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import smart_str
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from rest_framework.exceptions import ValidationError
 
 
 class RegisterUserView(GenericAPIView):
@@ -113,13 +114,19 @@ class PasswordResetConfirm(GenericAPIView):
         except:
             return Response({'message': "Te enviamos un link para cambiar tu contraseña"}, status=status.HTTP_200_OK)
         
-class SetNewPassword(GenericAPIView):
-    serializer_class = SetNewPasswordSerializer
-
+class SetNewPassword(APIView):
     def patch(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        return Response({'message': "password reset successfuly "}, status=status.HTTP_200_OK)
+        try:
+            serializer = SetNewPasswordSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            return Response({'message': "Password reset successfully"}, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            if "Password do not match" in str(e):
+                # Manejar el error de contraseñas que no coinciden
+                return Response({'non_field_errors': ['Las contraseñas no coinciden']}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                # Mantener el manejo original para otros errores
+                return Response({'non_field_errors': [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
     
 class LogoutUserView(GenericAPIView):
     serializer_class = LogoutSerializer
