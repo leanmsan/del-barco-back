@@ -11,6 +11,9 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils.encoding import smart_str, smart_bytes, force_str
 from rest_framework_simplejwt.tokens import Token, TokenError, RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.serializers import RefreshToken
+
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=68, min_length=6, write_only=True)

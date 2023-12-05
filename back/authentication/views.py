@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
+from rest_framework_simplejwt.views import TokenRefreshView
 from .serializers import UserRegisterSerializer, UserSerializer, LoginSerializer, PasswordResetRequestSerializer, SetNewPasswordSerializer, LogoutSerializer
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,7 +13,30 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import smart_str
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.tokens import RefreshToken
 
+
+class TokenRefreshView(GenericAPIView):
+
+    def post(self, request, *args, **kwargs):
+        # Obtén el refresh token del cuerpo de la solicitud
+        refresh_token = request.data.get('refresh_token')
+
+        if not refresh_token:
+            return Response({'error': 'Se requiere un refresh token en el cuerpo de la solicitud.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Intenta decodificar el refresh token
+            refresh = RefreshToken(refresh_token)
+            # Genera un nuevo token de acceso
+            access_token = str(refresh.access_token)
+            
+            # Devuelve el nuevo token de acceso en la respuesta
+            return Response({'access_token': access_token}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Maneja cualquier excepción que pueda ocurrir al decodificar el refresh token
+            return Response({'error': f'Error al procesar el refresh token: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
 class RegisterUserView(GenericAPIView):
     serializer_class=UserRegisterSerializer

@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import RegisterUserView, UserDetailsAPIView, VerifyUserEmail, UserDeleteAPIView, LoginUserView, TestAuthenticationView, PasswordResetConfirm, PasswordResetRequestView, SetNewPassword, LogoutUserView
+from .views import TokenRefreshView, RegisterUserView, UserDetailsAPIView, VerifyUserEmail, UserDeleteAPIView, LoginUserView, TestAuthenticationView, PasswordResetConfirm, PasswordResetRequestView, SetNewPassword, LogoutUserView
 
 urlpatterns = [
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', RegisterUserView.as_view(), name='register'),
     path('verify-email/', VerifyUserEmail.as_view(), name='verify'),
     path('delete-user/', UserDeleteAPIView.as_view(), name='delete-user'),
